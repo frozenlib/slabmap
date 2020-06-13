@@ -54,7 +54,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
 
     {
         let mut g = c.benchmark_group("iter_sparse");
-        for p in &[10, 100, 200, 400, 600, 800, 1000] {
+        for p in &[2, 4, 10, 20, 40, 100, 200, 400, 1000] {
             let len = 1000;
             let n = 1000;
             g.bench_with_input(BenchmarkId::new("this_optimize", p), p, |b, retain| {
