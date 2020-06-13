@@ -1,5 +1,25 @@
-use std::{fmt::Debug, mem::replace};
+/*! Slab allocator for fast iterating by optimizing the free space.
 
+# Examples
+
+```
+use slab_iter::Slab;
+
+let mut s = Slab::new();
+let key_a = s.insert("aaa");
+let key_b = s.insert("bbb");
+
+assert_eq!(s[key_a], "aaa");
+assert_eq!(s[key_b], "bbb");
+
+s.optimize();
+for (key, value) in &s {
+    println!("{} -> {}", key, value);
+}
+```
+*/
+
+use std::{fmt::Debug, mem::replace};
 /**
 A fast HashMap-like collection that automatically determines the key.
 
