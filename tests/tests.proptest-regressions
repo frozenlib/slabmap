@@ -1,0 +1,9 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 5e9ded691db3d85401b0a14489fab59f65a231ae131fafbd47f1e24f599f10bb # shrinks to ref actions = [Remove(0)]
+cc cee3569610f55261778ed13d51cc4eeaf181eb7d190076066acac49cdbb67856 # shrinks to ref actions = [Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Remove(31), Remove(19), Remove(17), Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Remove(2), Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert, Insert]
+cc a60da9de1f83b262c91d08207396bc718cd08ae18d96b51510ead4d057a3e54d # shrinks to ref actions = (9, [Insert, Insert, Insert, Remove(6), Remove(6), Optimize, Insert, Insert, Insert])
