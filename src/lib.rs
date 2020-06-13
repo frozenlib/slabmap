@@ -38,6 +38,9 @@ impl<T> Slab<T> {
     }
 
     /// Returns a reference to the value corresponding to the key.
+    ///
+    /// # computational complexity
+    /// `O(1)`
     pub fn get(&self, index: usize) -> Option<&T> {
         if let Entry::Occupied(value) = self.entries.get(index)? {
             Some(value)
@@ -47,6 +50,9 @@ impl<T> Slab<T> {
     }
 
     /// Returns a mutable reference to the value corresponding to the key.
+    ///
+    /// # computational complexity
+    /// `O(1)`
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if let Entry::Occupied(value) = self.entries.get_mut(index)? {
             Some(value)
@@ -58,6 +64,9 @@ impl<T> Slab<T> {
     /// Inserts a value into the slab.
     ///
     /// Returns the key associated with the value.
+    ///
+    /// # computational complexity
+    /// `O(1)`
     pub fn insert(&mut self, value: T) -> usize {
         let idx;
         if self.idx_next_vacant < self.entries.len() {
@@ -84,6 +93,9 @@ impl<T> Slab<T> {
     }
 
     /// Removes a key from the slab, returning the value at the key if the key was previously in the slab.
+    ///
+    /// # computational complexity
+    /// `O(1)`
     pub fn remove(&mut self, index: usize) -> Option<T> {
         if index + 1 < self.entries.len() {
             let e = replace(
@@ -112,13 +124,19 @@ impl<T> Slab<T> {
         None
     }
 
-    /// Clears the slab, removing all values.
+    /// Clears the slab, removing all values and optimize free spaces.
+    ///
+    /// # computational complexity
+    /// `O(1)`
     pub fn clear(&mut self) {
         self.entries.clear();
         self.idx_next_vacant = INVALID_INDEX;
     }
 
     /// Retains only the elements specified by the predicate and optimize free spaces.
+    ///
+    /// # computational complexity
+    /// `O(n)`, `n = self.len()`
     pub fn retain(&mut self, f: impl FnMut(&T) -> bool) {
         let mut f = f;
         let mut idx = 0;
@@ -151,6 +169,10 @@ impl<T> Slab<T> {
     }
 
     /// Optimizing the free space for speeding up iterations.
+    ///
+    /// # computational complexity
+    /// - `O(n)`, `n = self.len()` , If `remove` is called after the last optimization.
+    /// - `O(1)`, If `remove` is not called after the last optimization.
     pub fn optimize(&mut self) {
         if !matches!(
             self.entries.get(self.idx_next_vacant),
