@@ -118,15 +118,9 @@ impl<T> Slab<T> {
         self.idx_next_vacant = INVALID_INDEX;
     }
 
-    /// Optimizing the free space and speeding up iterations.
-    pub fn optimize(&mut self) {
-        if !matches!(
-            self.entries.get(self.idx_next_vacant),
-            Some(Entry::VacantTail { .. })
-        ) {
-            return;
-        }
-
+    /// Retains only the elements specified by the predicate and optimize free spaces.
+    pub fn retain(&mut self, f: impl FnMut(&T) -> bool) {
+        let mut f = f;
         let mut idx = 0;
         let mut idx_vacant_start = 0;
         self.idx_next_vacant = INVALID_INDEX;
@@ -138,27 +132,50 @@ impl<T> Slab<T> {
                 Entry::VacantHead { vacant_body_len } => {
                     idx += vacant_body_len + 2;
                 }
-                Entry::Occupied(_) => {
-                    self.merge_vacant(idx_vacant_start, idx);
-                    idx += 1;
-                    idx_vacant_start = idx;
+                Entry::Occupied(value) => {
+                    if f(value) {
+                        self.merge_vacant(idx_vacant_start, idx);
+                        idx += 1;
+                        idx_vacant_start = idx;
+                    } else {
+                        drop(value);
+                        self.entries[idx] = Entry::VacantTail {
+                            idx_next_vacant: INVALID_INDEX,
+                        };
+                        idx += 1;
+                    }
                 }
             }
         }
+        self.merge_vacant(idx_vacant_start, self.entries.len());
     }
-    fn merge_vacant(&mut self, start: usize, end: usize) {
-        if start >= end {
+
+    /// Optimizing the free space and speeding up iterations.
+    pub fn optimize(&mut self) {
+        if !matches!(
+            self.entries.get(self.idx_next_vacant),
+            Some(Entry::VacantTail { .. })
+        ) {
             return;
         }
-        if start + 2 <= end {
-            self.entries[start] = Entry::VacantHead {
-                vacant_body_len: end - start - 2,
+        self.retain(|_| true);
+    }
+    fn merge_vacant(&mut self, start: usize, end: usize) {
+        if start < end {
+            if end == self.entries.len() {
+                self.entries.truncate(start);
+            } else {
+                if start + 2 <= end {
+                    self.entries[start] = Entry::VacantHead {
+                        vacant_body_len: end - start - 2,
+                    }
+                }
+                self.entries[end - 1] = Entry::VacantTail {
+                    idx_next_vacant: self.idx_next_vacant,
+                };
+                self.idx_next_vacant = start;
             }
         }
-        self.entries[end - 1] = Entry::VacantTail {
-            idx_next_vacant: self.idx_next_vacant,
-        };
-        self.idx_next_vacant = start;
     }
 
     /// Gets an iterator over the entries of the slab, sorted by key.
