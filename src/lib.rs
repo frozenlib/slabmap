@@ -174,13 +174,15 @@ impl<T> Slab<T> {
     /// - `O(n)`, `n = self.len()` , If `remove` is called after the last optimization.
     /// - `O(1)`, If `remove` is not called after the last optimization.
     pub fn optimize(&mut self) {
-        if !matches!(
+        if !self.is_optimized() {
+            self.retain(|_| true);
+        }
+    }
+    fn is_optimized(&self) -> bool {
+        !matches!(
             self.entries.get(self.idx_next_vacant),
             Some(Entry::VacantTail { .. })
-        ) {
-            return;
-        }
-        self.retain(|_| true);
+        )
     }
     fn merge_vacant(&mut self, start: usize, end: usize) {
         if start < end {
