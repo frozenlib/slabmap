@@ -1,10 +1,14 @@
 [package]
 name = "slab-iter"
 version = "0.1.0"
-authors = ["frozenlib <frozenlib@users.noreply.github.com>"]
+authors = ["frozenlib"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/frozenlib/slab-iter"
+documentation = "https://docs.rs/slab-iter/"
+keywords = ["slab", "allocator", "map", "vec"]
+categories = ["data-structures", "memory-management"]
+description = "Slab allocator for fast iterating by optimizing the free space."
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 
