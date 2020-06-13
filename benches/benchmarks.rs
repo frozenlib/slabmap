@@ -15,9 +15,9 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         g.bench_function("slab", |b| b.iter(|| insert_remove_slab(10000)));
     }
     {
-        let mut g = c.benchmark_group("iter 1000 1000");
-        g.bench_function("this", |b| b.iter(|| iter_this(1000, 1000)));
-        g.bench_function("slab", |b| b.iter(|| iter_slab(1000, 1000)));
+        let mut g = c.benchmark_group("iter_all");
+        g.bench_function("this", |b| b.iter(|| iter_all_this(1000, 1000)));
+        g.bench_function("slab", |b| b.iter(|| iter_all_slab(1000, 1000)));
     }
     {
         let mut g = c.benchmark_group("iter_head");
@@ -106,7 +106,7 @@ fn insert_remove_slab(n: usize) -> slab::Slab<usize> {
     s
 }
 
-fn iter_this(len: usize, n: usize) -> usize {
+fn iter_all_this(len: usize, n: usize) -> usize {
     let mut s = slab_iter::Slab::new();
     for i in 0..len {
         s.insert(i);
@@ -119,7 +119,7 @@ fn iter_this(len: usize, n: usize) -> usize {
     }
     sum
 }
-fn iter_slab(len: usize, n: usize) -> usize {
+fn iter_all_slab(len: usize, n: usize) -> usize {
     let mut s = slab::Slab::new();
     for i in 0..len {
         s.insert(i);
