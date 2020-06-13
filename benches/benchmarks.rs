@@ -1,4 +1,4 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
 criterion_main!(benches);
 criterion_group!(benches, criterion_benchmark);
@@ -20,28 +20,53 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         g.bench_function("slab", |b| b.iter(|| iter_slab(1000, 1000)));
     }
     {
-        let mut g = c.benchmark_group("iter_head 1000 1000");
-        g.bench_function("this_optimize", |b| {
-            b.iter(|| iter_head_this(1000, 1000, true))
-        });
-        g.bench_function("this", |b| b.iter(|| iter_head_this(1000, 1000, false)));
-        g.bench_function("slab", |b| b.iter(|| iter_head_slab(1000, 1000)));
+        let mut g = c.benchmark_group("iter_head");
+        let len = 1000;
+        let n = 1000;
+        for p in &[10, 100, 200, 400, 600, 800, 1000] {
+            g.bench_with_input(BenchmarkId::new("this_optimize", p), p, |b, retain| {
+                b.iter(|| iter_head_this(len, *retain, n, true))
+            });
+            g.bench_with_input(BenchmarkId::new("this", p), p, |b, retain| {
+                b.iter(|| iter_head_this(len, *retain, n, false))
+            });
+            g.bench_with_input(BenchmarkId::new("slab", p), p, |b, retain| {
+                b.iter(|| iter_head_slab(len, *retain, n))
+            });
+        }
     }
     {
-        let mut g = c.benchmark_group("iter_tail 1000 1000");
-        g.bench_function("this_optimize", |b| {
-            b.iter(|| iter_tail_this(1000, 1000, true))
-        });
-        g.bench_function("this", |b| b.iter(|| iter_tail_this(1000, 1000, false)));
-        g.bench_function("slab", |b| b.iter(|| iter_tail_slab(1000, 1000)));
+        let mut g = c.benchmark_group("iter_tail");
+        for p in &[10, 100, 200, 400, 600, 800, 1000] {
+            let len = 1000;
+            let n = 1000;
+            g.bench_with_input(BenchmarkId::new("this_optimize", p), p, |b, retain| {
+                b.iter(|| iter_tail_this(len, *retain, n, true))
+            });
+            g.bench_with_input(BenchmarkId::new("this", p), p, |b, retain| {
+                b.iter(|| iter_tail_this(len, *retain, n, false))
+            });
+            g.bench_with_input(BenchmarkId::new("slab", p), p, |b, retain| {
+                b.iter(|| iter_tail_slab(len, *retain, n))
+            });
+        }
     }
+
     {
-        let mut g = c.benchmark_group("iter_sparse 1000 1000");
-        g.bench_function("this_optimize", |b| {
-            b.iter(|| iter_sparse_this(1000, 1000, true))
-        });
-        g.bench_function("this", |b| b.iter(|| iter_sparse_this(1000, 1000, false)));
-        g.bench_function("slab", |b| b.iter(|| iter_sparse_slab(1000, 1000)));
+        let mut g = c.benchmark_group("iter_sparse");
+        for p in &[10, 100, 200, 400, 600, 800, 1000] {
+            let len = 1000;
+            let n = 1000;
+            g.bench_with_input(BenchmarkId::new("this_optimize", p), p, |b, retain| {
+                b.iter(|| iter_sparse_this(len, *retain, n, true))
+            });
+            g.bench_with_input(BenchmarkId::new("this", p), p, |b, retain| {
+                b.iter(|| iter_sparse_this(len, *retain, n, false))
+            });
+            g.bench_with_input(BenchmarkId::new("slab", p), p, |b, retain| {
+                b.iter(|| iter_sparse_slab(len, *retain, n))
+            });
+        }
     }
 }
 
@@ -108,12 +133,12 @@ fn iter_slab(len: usize, n: usize) -> usize {
     sum
 }
 
-fn iter_head_this(len: usize, n: usize, optimize: bool) -> usize {
+fn iter_head_this(len: usize, retain: usize, n: usize, optimize: bool) -> usize {
     let mut s = slab_iter::Slab::new();
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).take(n * 3 / 4) {
+    for i in (0..len).take(len - retain) {
         s.remove(i);
     }
     if optimize {
@@ -129,12 +154,12 @@ fn iter_head_this(len: usize, n: usize, optimize: bool) -> usize {
     sum
 }
 
-fn iter_head_slab(len: usize, n: usize) -> usize {
+fn iter_head_slab(len: usize, retain: usize, n: usize) -> usize {
     let mut s = slab::Slab::new();
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).take(n * 3 / 4) {
+    for i in (0..len).take(len - retain) {
         s.remove(i);
     }
     let mut sum = 0;
@@ -146,12 +171,12 @@ fn iter_head_slab(len: usize, n: usize) -> usize {
     sum
 }
 
-fn iter_tail_this(len: usize, n: usize, optimize: bool) -> usize {
+fn iter_tail_this(len: usize, retain: usize, n: usize, optimize: bool) -> usize {
     let mut s = slab_iter::Slab::new();
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).rev().take(n * 3 / 4) {
+    for i in (0..len).rev().take(len - retain) {
         s.remove(i);
     }
     if optimize {
@@ -167,12 +192,12 @@ fn iter_tail_this(len: usize, n: usize, optimize: bool) -> usize {
     sum
 }
 
-fn iter_tail_slab(len: usize, n: usize) -> usize {
+fn iter_tail_slab(len: usize, retain: usize, n: usize) -> usize {
     let mut s = slab::Slab::new();
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).rev().take(n * 3 / 4) {
+    for i in (0..len).rev().take(len - retain) {
         s.remove(i);
     }
     let mut sum = 0;
@@ -184,13 +209,13 @@ fn iter_tail_slab(len: usize, n: usize) -> usize {
     sum
 }
 
-fn iter_sparse_this(len: usize, n: usize, optimize: bool) -> usize {
+fn iter_sparse_this(len: usize, retain: usize, n: usize, optimize: bool) -> usize {
     let mut s = slab_iter::Slab::new();
     for i in 0..len {
         s.insert(i);
     }
     for i in 0..len {
-        if i % (len / 10) != 0 {
+        if i % retain != 0 {
             s.remove(i);
         }
     }
@@ -207,13 +232,13 @@ fn iter_sparse_this(len: usize, n: usize, optimize: bool) -> usize {
     sum
 }
 
-fn iter_sparse_slab(len: usize, n: usize) -> usize {
+fn iter_sparse_slab(len: usize, retain: usize, n: usize) -> usize {
     let mut s = slab::Slab::new();
     for i in 0..len {
         s.insert(i);
     }
     for i in 0..len {
-        if i % (len / 10) != 0 {
+        if i % retain != 0 {
             s.remove(i);
         }
     }

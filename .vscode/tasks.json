@@ -75,10 +75,35 @@
       "command": "cargo",
       "args": ["bench", "--", "--save-baseline", "saved-base"],
       "problemMatcher": ["$rustc"],
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
+      "presentation": {
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "type": "shell",
+      "label": "cargo bench compare",
+      "command": "cargo",
+      "args": [
+        "bench",
+        "--",
+        "--load-baseline",
+        "base",
+        "--baseline",
+        "saved-base"
+      ],
+      "problemMatcher": ["$rustc"],
+      "presentation": {
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "type": "shell",
+      "label": "cargo bench show report",
+      "command": "target/criterion/report/index.html",
+      "args": [],
+      "problemMatcher": [],
       "presentation": {
         "panel": "dedicated",
         "clear": true
