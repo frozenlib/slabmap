@@ -82,18 +82,16 @@ impl<T> Slab<T> {
                 return Some(value);
             }
             replace(&mut self.entries[index], e);
-        } else {
-            if index + 1 == self.entries.len() {
-                let e = self.entries.remove(index);
-                if let Entry::Occupied(value) = e {
-                    self.len -= 1;
-                    if self.len == 0 {
-                        self.clear();
-                    }
-                    return Some(value);
+        } else if index + 1 == self.entries.len() {
+            let e = self.entries.remove(index);
+            if let Entry::Occupied(value) = e {
+                self.len -= 1;
+                if self.len == 0 {
+                    self.clear();
                 }
-                self.entries.push(e);
+                return Some(value);
             }
+            self.entries.push(e);
         }
         None
     }
