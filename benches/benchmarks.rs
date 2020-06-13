@@ -215,7 +215,7 @@ fn iter_sparse_this(len: usize, retain: usize, n: usize, optimize: bool) -> usiz
         s.insert(i);
     }
     for i in 0..len {
-        if i % retain != 0 {
+        if i % (len / retain) != 0 {
             s.remove(i);
         }
     }
@@ -238,7 +238,7 @@ fn iter_sparse_slab(len: usize, retain: usize, n: usize) -> usize {
         s.insert(i);
     }
     for i in 0..len {
-        if i % retain != 0 {
+        if i % (len / retain) != 0 {
             s.remove(i);
         }
     }
