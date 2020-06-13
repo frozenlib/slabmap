@@ -138,7 +138,7 @@ fn iter_head_this(len: usize, retain: usize, n: usize, optimize: bool) -> usize 
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).take(len - retain) {
+    for i in (0..len).rev().take(len - retain) {
         s.remove(i);
     }
     if optimize {
@@ -159,7 +159,7 @@ fn iter_head_slab(len: usize, retain: usize, n: usize) -> usize {
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).take(len - retain) {
+    for i in (0..len).rev().take(len - retain) {
         s.remove(i);
     }
     let mut sum = 0;
@@ -176,7 +176,7 @@ fn iter_tail_this(len: usize, retain: usize, n: usize, optimize: bool) -> usize 
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).rev().take(len - retain) {
+    for i in (0..len).take(len - retain) {
         s.remove(i);
     }
     if optimize {
@@ -197,7 +197,7 @@ fn iter_tail_slab(len: usize, retain: usize, n: usize) -> usize {
     for i in 0..len {
         s.insert(i);
     }
-    for i in (0..len).rev().take(len - retain) {
+    for i in (0..len).take(len - retain) {
         s.remove(i);
     }
     let mut sum = 0;
