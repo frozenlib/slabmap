@@ -16,6 +16,9 @@ s.optimize();
 for (key, value) in &s {
     println!("{} -> {}", key, value);
 }
+
+let value = s.remove(key_a);
+assert_eq!(value, Some("aaa"));
 ```
 */
 
