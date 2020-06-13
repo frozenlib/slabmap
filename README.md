@@ -4,7 +4,11 @@
 [![Docs.rs](https://docs.rs/slab-iter/badge.svg)](https://docs.rs/crate/slab-iter)
 [![Actions Status](https://github.com/frozenlib/slab-iter/workflows/build/badge.svg)](https://github.com/frozenlib/slab-iter/actions)
 
-Slab allocator for fast iterating by optimizing the free space.
+This crate provides the type `Slab`.
+`Slab` is HashMap-like collection that automatically determines the key.
+
+Slab will iterate slower if you add a lot of values and then remove a lot of values.
+But, calling [`Slab::optimize`] restores the speed.
 
 ## Install
 

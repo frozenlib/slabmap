@@ -113,7 +113,7 @@
       "type": "shell",
       "label": "cargo doc open",
       "command": "cargo",
-      "args": ["doc", "--open", "--no-deps", "--all-features"],
+      "args": ["+nightly", "doc", "--open", "--no-deps", "--all-features"],
       "problemMatcher": ["$rustc"],
       "presentation": {
         "panel": "dedicated",

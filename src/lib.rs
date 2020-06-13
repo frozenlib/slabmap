@@ -1,4 +1,8 @@
-/*! Slab allocator for fast iterating by optimizing the free space.
+/*! This crate provides the type [`Slab`].
+[`Slab`] is HashMap-like collection that automatically determines the key.
+
+Slab will iterate slower if you add a lot of values and then remove a lot of values.
+But, calling [`optimize`](Slab::optimize) restores the speed.
 
 # Examples
 
@@ -26,15 +30,15 @@ use std::{fmt::Debug, mem::replace};
 /**
 A fast HashMap-like collection that automatically determines the key.
 
-# Performance
+# computational complexity
 
-| method     | computational complexity |
-| ---------- | ------------------------ |
-| `insert`   | `O(1)`                   |
-| `remove`   | `O(1)`                   |
-| `get`      | `O(1)`                   |
-| `get_mut`  | `O(1)`                   |
-| `optimize` | `O(n)`, `n = self.len()` |
+| method                       | computational complexity |
+| ---------------------------- | ------------------------ |
+| [`insert`](Self::insert)     | `O(1)`                   |
+| [`remove`](Self::remove)     | `O(1)`                   |
+| [`get`](Self::get)           | `O(1)`                   |
+| [`get_mut`](Self::get_mut)   | `O(1)`                   |
+| [`optimize`](Self::optimize) | `O(n)`, `n = self.len()` |
 */
 #[derive(Clone)]
 pub struct Slab<T> {
@@ -159,6 +163,21 @@ impl<T> Slab<T> {
     }
 
     /// Retains only the elements specified by the predicate and optimize free spaces.
+    ///
+    /// ```
+    /// use slab_iter::Slab;
+    ///
+    /// let mut s = Slab::new();
+    /// s.insert(10);
+    /// s.insert(15);
+    /// s.insert(20);
+    /// s.insert(25);
+    ///
+    /// s.retain(|x| x % 2 == 0);
+    ///
+    /// let value: Vec<_> = s.values().cloned().collect();
+    /// assert_eq!(value, vec![10, 20]);
+    /// ```
     pub fn retain(&mut self, f: impl FnMut(&T) -> bool) {
         let mut f = f;
         let mut idx = 0;
@@ -222,7 +241,7 @@ impl<T> Slab<T> {
 
     /// Gets an iterator over the entries of the slab, sorted by key.
     ///
-    /// If you make a large number of `remove` calls, `optimize` should be called before calling this function.
+    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
     pub fn iter(&self) -> Iter<T> {
         Iter {
             iter: self.entries.iter().enumerate(),
@@ -233,7 +252,7 @@ impl<T> Slab<T> {
 
     /// Gets a mutable iterator over the entries of the slab, sorted by key.
     ///
-    /// If you make a large number of `remove` calls, `optimize` should be called before calling this function.
+    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut {
             iter: self.entries.iter_mut().enumerate(),
