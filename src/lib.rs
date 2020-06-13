@@ -26,7 +26,7 @@ assert_eq!(value, Some("aaa"));
 ```
 */
 
-use std::{fmt::Debug, mem::replace};
+use std::{fmt::Debug, iter::FusedIterator, mem::replace};
 /**
 A fast HashMap-like collection that automatically determines the key.
 
@@ -352,6 +352,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
         self.len - self.used
     }
 }
+impl<'a, T> FusedIterator for Iter<'a, T> {}
 
 /// A mutable iterator over the entries of a Slab.
 pub struct IterMut<'a, T> {
@@ -387,3 +388,4 @@ impl<'a, T> Iterator for IterMut<'a, T> {
         self.len - self.used
     }
 }
+impl<'a, T> FusedIterator for IterMut<'a, T> {}
