@@ -20,6 +20,11 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         g.bench_function("slab", |b| b.iter(|| iter_all_slab(1000, 1000)));
     }
     {
+        let mut g = c.benchmark_group("iter_mut_all");
+        g.bench_function("this", |b| b.iter(|| iter_mut_all_this(1000, 1000)));
+        g.bench_function("slab", |b| b.iter(|| iter_mut_all_slab(1000, 1000)));
+    }
+    {
         let mut g = c.benchmark_group("iter_head");
         let len = 1000;
         let n = 1000;
@@ -133,6 +138,33 @@ fn iter_all_slab(len: usize, n: usize) -> usize {
     sum
 }
 
+fn iter_mut_all_this(len: usize, n: usize) -> usize {
+    let mut s = slab_iter::Slab::new();
+    for i in 0..len {
+        s.insert(i);
+    }
+    let mut sum = 0;
+    for _ in 0..n {
+        for x in s.iter_mut() {
+            sum += *x.1;
+        }
+    }
+    sum
+}
+fn iter_mut_all_slab(len: usize, n: usize) -> usize {
+    let mut s = slab::Slab::new();
+    for i in 0..len {
+        s.insert(i);
+    }
+    let mut sum = 0;
+    for _ in 0..n {
+        for x in s.iter_mut() {
+            sum += *x.1;
+        }
+    }
+    sum
+}
+
 fn iter_head_this(len: usize, retain: usize, n: usize, optimize: bool) -> usize {
     let mut s = slab_iter::Slab::new();
     for i in 0..len {
@@ -148,7 +180,7 @@ fn iter_head_this(len: usize, retain: usize, n: usize, optimize: bool) -> usize 
     let mut sum = 0;
     for _ in 0..n {
         for x in s.iter() {
-            sum += x.1;
+            sum += *x.1;
         }
     }
     sum
