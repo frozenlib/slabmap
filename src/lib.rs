@@ -163,6 +163,11 @@ impl<T> Slab<T> {
         self.iter().map(|x| x.1)
     }
 }
+impl<T> Default for Slab<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl<T: Debug> Debug for Slab<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
