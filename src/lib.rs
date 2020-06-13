@@ -145,8 +145,8 @@ impl<T> Slab<T> {
 
     pub fn iter(&self) -> Iter<T> {
         Iter {
-            source: self,
-            idx: 0,
+            iter: self.entries.iter().enumerate(),
+            len: self.len,
             used: 0,
         }
     }
@@ -209,40 +209,36 @@ impl<'a, T> IntoIterator for &'a mut Slab<T> {
 }
 
 pub struct Iter<'a, T> {
-    source: &'a Slab<T>,
-    idx: usize,
+    iter: std::iter::Enumerate<std::slice::Iter<'a, Entry<T>>>,
+    len: usize,
     used: usize,
 }
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = (usize, &'a T);
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(e) = self.source.entries.get(self.idx) {
+        while let Some(e) = self.iter.next() {
             match e {
-                Entry::Occupied(value) => {
-                    let key = self.idx;
-                    self.idx += 1;
+                (key, Entry::Occupied(value)) => {
                     self.used += 1;
                     return Some((key, value));
                 }
-                Entry::VacantHead { vacant_body_len } => {
-                    self.idx += vacant_body_len + 2;
+                (_, Entry::VacantHead { vacant_body_len }) => {
+                    self.iter.nth(*vacant_body_len);
                 }
-                Entry::VacantTail { .. } => {
-                    self.idx += 1;
-                }
+                (_, Entry::VacantTail { .. }) => {}
             }
         }
         None
     }
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.source.len - self.used;
+        let len = self.len - self.used;
         (len, Some(len))
     }
     fn count(self) -> usize
     where
         Self: Sized,
     {
-        self.source.len - self.used
+        self.len - self.used
     }
 }
 pub struct IterMut<'a, T> {
