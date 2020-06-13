@@ -5,12 +5,12 @@ criterion_group!(benches, criterion_benchmark);
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     {
-        let mut g = c.benchmark_group("insert 10000");
+        let mut g = c.benchmark_group("insert");
         g.bench_function("this", |b| b.iter(|| insert_this(10000)));
         g.bench_function("slab", |b| b.iter(|| insert_slab(10000)));
     }
     {
-        let mut g = c.benchmark_group("insert remove 10000");
+        let mut g = c.benchmark_group("insert remove");
         g.bench_function("this", |b| b.iter(|| insert_remove_this(10000)));
         g.bench_function("slab", |b| b.iter(|| insert_remove_slab(10000)));
     }
