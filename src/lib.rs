@@ -177,7 +177,7 @@ impl<T> Slab<T> {
         }
     }
     fn is_optimized(&self) -> bool {
-        self.non_optimized != 0
+        self.non_optimized == 0
     }
     fn merge_vacant(&mut self, start: usize, end: usize) {
         if start < end {
