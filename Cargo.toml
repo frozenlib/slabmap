@@ -10,3 +10,12 @@ edition = "2018"
 
 [dev-dependencies]
 proptest = "0.10"
+criterion = "0.3"
+slab = "0.4"
+
+[lib]
+bench = false
+
+[[bench]]
+name = "benchmarks"
+harness = false

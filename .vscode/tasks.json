@@ -19,7 +19,7 @@
       },
       "options": {
         "env": {
-          //          "RUST_BACKTRACE": "1",
+          // "RUST_BACKTRACE": "1",
           "PROPTEST_CASES": "10000",
           "PROPTEST_MAX_GLOBAL_REJECTS": "10000",
           "PROPTEST_MAX_LOCAL_REJECTS": "200000",
@@ -58,7 +58,7 @@
       "type": "shell",
       "label": "cargo bench",
       "command": "cargo",
-      "args": ["bench", "--", "--baseline", "base"],
+      "args": ["bench"],
       "problemMatcher": ["$rustc"],
       "group": {
         "kind": "test",
@@ -67,27 +67,21 @@
       "presentation": {
         "panel": "dedicated",
         "clear": true
-      },
-      "options": {
-        "env": {
-          "RUST_BACKTRACE": "1"
-        }
       }
     },
     {
       "type": "shell",
       "label": "cargo bench update baseline",
       "command": "cargo",
-      "args": ["bench"],
+      "args": ["bench", "--", "--save-baseline", "saved-base"],
       "problemMatcher": ["$rustc"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
       "presentation": {
         "panel": "dedicated",
         "clear": true
-      },
-      "options": {
-        "env": {
-          "RUST_BACKTRACE": "1"
-        }
       }
     },
     {
@@ -100,11 +94,6 @@
         "panel": "dedicated",
         "clear": true
       }
-      // "options": {
-      //     "env": {
-      //         "RUST_BACKTRACE": "1",
-      //     }
-      // }
     }
   ]
 }
