@@ -1,5 +1,6 @@
 use std::{fmt::Debug, mem::replace};
 
+/// A fast HashMap-like collection that automatically determines the key.
 #[derive(Clone)]
 pub struct Slab<T> {
     entries: Vec<Entry<T>>,
@@ -16,6 +17,8 @@ enum Entry<T> {
 }
 
 impl<T> Slab<T> {
+    /// Constructs a new, empty Slab<T>.
+    /// The slab will not allocate until elements are pushed onto it.
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
@@ -23,12 +26,18 @@ impl<T> Slab<T> {
             len: 0,
         }
     }
+
+    /// Returns the number of elements in the slab.
     pub fn len(&self) -> usize {
         self.len
     }
+
+    /// Returns true if the slab contains no elements.
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
+
+    /// Returns a reference to the value corresponding to the key.
     pub fn get(&self, index: usize) -> Option<&T> {
         if let Entry::Occupied(value) = self.entries.get(index)? {
             Some(value)
@@ -36,6 +45,8 @@ impl<T> Slab<T> {
             None
         }
     }
+
+    /// Returns a mutable reference to the value corresponding to the key.
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if let Entry::Occupied(value) = self.entries.get_mut(index)? {
             Some(value)
@@ -44,6 +55,9 @@ impl<T> Slab<T> {
         }
     }
 
+    /// Inserts a value into the slab.
+    ///
+    /// Returns the key associated with the value.
     pub fn insert(&mut self, value: T) -> usize {
         let idx;
         if self.idx_next_vacant < self.entries.len() {
@@ -68,6 +82,8 @@ impl<T> Slab<T> {
         self.len += 1;
         idx
     }
+
+    /// Removes a key from the slab, returning the value at the key if the key was previously in the slab.
     pub fn remove(&mut self, index: usize) -> Option<T> {
         if index + 1 < self.entries.len() {
             let e = replace(
@@ -95,10 +111,14 @@ impl<T> Slab<T> {
         }
         None
     }
+
+    /// Clears the slab, removing all values.
     pub fn clear(&mut self) {
         self.entries.clear();
         self.idx_next_vacant = INVALID_INDEX;
     }
+
+    /// Optimizing the free space and speeding up iterations.
     pub fn optimize(&mut self) {
         if !matches!(
             self.entries.get(self.idx_next_vacant),
@@ -141,6 +161,9 @@ impl<T> Slab<T> {
         self.idx_next_vacant = start;
     }
 
+    /// Gets an iterator over the entries of the slab, sorted by key.
+    ///
+    /// If you make a large number of `remove` calls, `optimize` should be called before calling this function.
     pub fn iter(&self) -> Iter<T> {
         Iter {
             iter: self.entries.iter().enumerate(),
@@ -148,6 +171,10 @@ impl<T> Slab<T> {
             used: 0,
         }
     }
+
+    /// Gets a mutable iterator over the entries of the slab, sorted by key.
+    ///
+    /// If you make a large number of `remove` calls, `optimize` should be called before calling this function.
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut {
             iter: self.entries.iter_mut().enumerate(),
@@ -156,10 +183,13 @@ impl<T> Slab<T> {
         }
     }
 
+    /// Gets an iterator over the keys of the slab, in sorted order.
     pub fn keys<'a>(&'a self) -> impl Iterator<Item = usize> + 'a {
         self.iter().map(|x| x.0)
     }
-    pub fn values<'a>(&'a self) -> impl Iterator<Item = &'a T> {
+
+    /// Gets an iterator over the values of the slab.
+    pub fn values(&self) -> impl Iterator<Item = &T> {
         self.iter().map(|x| x.1)
     }
 }
@@ -168,7 +198,6 @@ impl<T> Default for Slab<T> {
         Self::new()
     }
 }
-
 impl<T: Debug> Debug for Slab<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{{")?;
@@ -211,6 +240,7 @@ impl<'a, T> IntoIterator for &'a mut Slab<T> {
     }
 }
 
+/// An iterator over the entries of a Slab.
 pub struct Iter<'a, T> {
     iter: std::iter::Enumerate<std::slice::Iter<'a, Entry<T>>>,
     len: usize,
@@ -244,6 +274,8 @@ impl<'a, T> Iterator for Iter<'a, T> {
         self.len - self.used
     }
 }
+
+/// A mutable iterator over the entries of a Slab.
 pub struct IterMut<'a, T> {
     iter: std::iter::Enumerate<std::slice::IterMut<'a, Entry<T>>>,
     len: usize,
