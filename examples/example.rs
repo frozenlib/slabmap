@@ -31,7 +31,7 @@ fn example_retain() {
     s.insert(20);
     s.insert(25);
 
-    s.retain(|x| x % 2 == 0);
+    s.retain(|_idx, x| *x % 2 == 0);
 
     let value: Vec<_> = s.values().cloned().collect();
     assert_eq!(value, vec![10, 20]);

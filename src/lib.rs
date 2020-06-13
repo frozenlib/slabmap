@@ -173,26 +173,26 @@ impl<T> Slab<T> {
     /// s.insert(20);
     /// s.insert(25);
     ///
-    /// s.retain(|x| x % 2 == 0);
+    /// s.retain(|_idx, value| *value % 2 == 0);
     ///
     /// let value: Vec<_> = s.values().cloned().collect();
     /// assert_eq!(value, vec![10, 20]);
     /// ```
-    pub fn retain(&mut self, f: impl FnMut(&T) -> bool) {
+    pub fn retain(&mut self, f: impl FnMut(usize, &mut T) -> bool) {
         let mut f = f;
         let mut idx = 0;
         let mut idx_vacant_start = 0;
         self.idx_next_vacant = INVALID_INDEX;
-        while let Some(e) = self.entries.get(idx) {
+        while let Some(e) = self.entries.get_mut(idx) {
             match e {
                 Entry::VacantTail { .. } => {
                     idx += 1;
                 }
                 Entry::VacantHead { vacant_body_len } => {
-                    idx += vacant_body_len + 2;
+                    idx += *vacant_body_len + 2;
                 }
                 Entry::Occupied(value) => {
-                    if f(value) {
+                    if f(idx, value) {
                         self.merge_vacant(idx_vacant_start, idx);
                         idx += 1;
                         idx_vacant_start = idx;
@@ -215,7 +215,7 @@ impl<T> Slab<T> {
     /// If the free space has already been optimized, this method does nothing and completes with O(1).
     pub fn optimize(&mut self) {
         if !self.is_optimized() {
-            self.retain(|_| true);
+            self.retain(|_, _| true);
         }
     }
     fn is_optimized(&self) -> bool {
