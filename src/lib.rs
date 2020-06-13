@@ -6,6 +6,7 @@ pub struct Slab<T> {
     entries: Vec<Entry<T>>,
     idx_next_vacant: usize,
     len: usize,
+    non_optimized: usize,
 }
 const INVALID_INDEX: usize = usize::MAX;
 
@@ -24,6 +25,7 @@ impl<T> Slab<T> {
             entries: Vec::new(),
             idx_next_vacant: INVALID_INDEX,
             len: 0,
+            non_optimized: 0,
         }
     }
 
@@ -84,6 +86,7 @@ impl<T> Slab<T> {
                 Entry::Occupied(_) => unreachable!(),
             };
             self.entries[idx] = Entry::Occupied(value);
+            self.non_optimized = self.non_optimized.saturating_sub(1);
         } else {
             idx = self.entries.len();
             self.entries.push(Entry::Occupied(value));
@@ -107,6 +110,7 @@ impl<T> Slab<T> {
             if let Entry::Occupied(value) = e {
                 self.len -= 1;
                 self.idx_next_vacant = index;
+                self.non_optimized += 1;
                 return Some(value);
             }
             replace(&mut self.entries[index], e);
@@ -131,6 +135,7 @@ impl<T> Slab<T> {
     pub fn clear(&mut self) {
         self.entries.clear();
         self.idx_next_vacant = INVALID_INDEX;
+        self.non_optimized = 0;
     }
 
     /// Retains only the elements specified by the predicate and optimize free spaces.
@@ -166,6 +171,7 @@ impl<T> Slab<T> {
             }
         }
         self.merge_vacant(idx_vacant_start, self.entries.len());
+        self.non_optimized = 0;
     }
 
     /// Optimizing the free space for speeding up iterations.
@@ -179,10 +185,7 @@ impl<T> Slab<T> {
         }
     }
     fn is_optimized(&self) -> bool {
-        !matches!(
-            self.entries.get(self.idx_next_vacant),
-            Some(Entry::VacantTail { .. })
-        )
+        self.non_optimized != 0
     }
     fn merge_vacant(&mut self, start: usize, end: usize) {
         if start < end {
