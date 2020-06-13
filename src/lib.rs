@@ -150,7 +150,7 @@ impl<T> Slab<T> {
         self.merge_vacant(idx_vacant_start, self.entries.len());
     }
 
-    /// Optimizing the free space and speeding up iterations.
+    /// Optimizing the free space for speeding up iterations.
     pub fn optimize(&mut self) {
         if !matches!(
             self.entries.get(self.idx_next_vacant),
