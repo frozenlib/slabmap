@@ -7,8 +7,25 @@
 This crate provides the type `Slab`.
 `Slab` is HashMap-like collection that automatically determines the key.
 
-Slab will iterate slower if you add a lot of values and then remove a lot of values.
-But, calling [`Slab::optimize`] restores the speed.
+## The difference between `Slab` and `HashMap`
+
+- `Slab` can only use usize as a key.
+- The key of `Slab` is determined automatically.
+- `Slab` runs faster than `HashMap`.
+
+The following chart shows the difference in performance between `Slab`, `HashMap` and `BTreeMap`.
+
+## TODO(graph)
+
+## Comparison with Similar Crates
+
+- [`slab`](https://crates.io/crates/slab), Carl Lerche's slab crate provides a slab implementation with a similar API.
+
+  For both `slab` and `slab-iter`, after adding many elements to the collection, removing many element will reduce iterate performance.
+
+  However, unlike `slab`, `slab-iter` can restore iterate performance by calling `Slab::optimize`.
+
+## TODO(graph2)
 
 ## Install
 

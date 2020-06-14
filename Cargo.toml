@@ -7,7 +7,7 @@ repository = "https://github.com/frozenlib/slab-iter"
 documentation = "https://docs.rs/slab-iter/"
 keywords = ["slab", "allocator", "map", "vec"]
 categories = ["data-structures", "memory-management"]
-description = "Slab allocator for fast iterating by optimizing the free space."
+description = "HashMap-like collection that automatically determines the key."
 edition = "2018"
 
 [dependencies]
@@ -16,10 +16,15 @@ edition = "2018"
 proptest = "0.10"
 criterion = "0.3"
 slab = "0.4"
+rand = "0.7"
 
 [lib]
 bench = false
 
 [[bench]]
 name = "benchmarks"
+harness = false
+
+[[bench]]
+name = "doc"
 harness = false

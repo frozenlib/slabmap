@@ -1,9 +1,6 @@
 /*! This crate provides the type [`Slab`].
 [`Slab`] is HashMap-like collection that automatically determines the key.
 
-Slab will iterate slower if you add a lot of values and then remove a lot of values.
-But, calling [`optimize`](Slab::optimize) restores the speed.
-
 # Examples
 
 ```
