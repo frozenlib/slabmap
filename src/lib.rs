@@ -127,32 +127,61 @@ impl<T> Slab<T> {
 
     /// Removes a key from the slab, returning the value at the key if the key was previously in the slab.
     pub fn remove(&mut self, index: usize) -> Option<T> {
-        if index + 1 < self.entries.len() {
+        let is_last = index + 1 == self.entries.len();
+        let e = self.entries.get_mut(index)?;
+        if !matches!(e, Entry::Occupied(..)) {
+            return None;
+        }
+        self.len -= 1;
+        let e = if is_last {
+            let e = self.entries.pop().unwrap();
+            if index == 0 {
+                self.entries.clear();
+            }
+            e
+        } else {
             let e = replace(
-                &mut self.entries[index],
+                e,
                 Entry::VacantTail {
                     idx_next_vacant: self.idx_next_vacant,
                 },
             );
-            if let Entry::Occupied(value) = e {
-                self.len -= 1;
-                self.idx_next_vacant = index;
-                self.non_optimized += 1;
-                return Some(value);
-            }
-            replace(&mut self.entries[index], e);
-        } else if index + 1 == self.entries.len() {
-            let e = self.entries.remove(index);
-            if let Entry::Occupied(value) = e {
-                self.len -= 1;
-                if self.len == 0 {
-                    self.clear();
-                }
-                return Some(value);
-            }
-            self.entries.push(e);
+            self.idx_next_vacant = index;
+            self.non_optimized += 1;
+            e
+        };
+        if let Entry::Occupied(value) = e {
+            Some(value)
+        } else {
+            unreachable!()
         }
-        None
+
+        // if index + 1 < self.entries.len() {
+        //     let e = replace(
+        //         &mut self.entries[index],
+        //         Entry::VacantTail {
+        //             idx_next_vacant: self.idx_next_vacant,
+        //         },
+        //     );
+        //     if let Entry::Occupied(value) = e {
+        //         self.len -= 1;
+        //         self.idx_next_vacant = index;
+        //         self.non_optimized += 1;
+        //         return Some(value);
+        //     }
+        //     replace(&mut self.entries[index], e);
+        // } else if index + 1 == self.entries.len() {
+        //     let e = self.entries.remove(index);
+        //     if let Entry::Occupied(value) = e {
+        //         self.len -= 1;
+        //         if self.len == 0 {
+        //             self.clear();
+        //         }
+        //         return Some(value);
+        //     }
+        //     self.entries.push(e);
+        // }
+        // None
     }
 
     /// Clears the slab, removing all values and optimize free spaces.
