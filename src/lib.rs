@@ -300,6 +300,7 @@ impl<T> Slab<T> {
             used: 0,
         }
     }
+
     /// Gets a mutable iterator over the values of the slab.
     pub fn values_mut(&mut self) -> ValuesMut<T> {
         ValuesMut {
@@ -364,21 +365,22 @@ pub struct Iter<'a, T> {
 }
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = (usize, &'a T);
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(e) = self.iter.next() {
-            match e {
+        let mut e_opt = self.iter.next();
+        while let Some(e) = e_opt {
+            e_opt = match e {
                 (key, Entry::Occupied(value)) => {
                     self.used += 1;
                     return Some((key, value));
                 }
-                (_, Entry::VacantHead { vacant_body_len }) => {
-                    self.iter.nth(*vacant_body_len);
-                }
-                (_, Entry::VacantTail { .. }) => {}
+                (_, Entry::VacantHead { vacant_body_len }) => self.iter.nth(*vacant_body_len + 1),
+                (_, Entry::VacantTail { .. }) => self.iter.next(),
             }
         }
         None
     }
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len - self.used;
         (len, Some(len))
@@ -401,21 +403,22 @@ pub struct IterMut<'a, T> {
 }
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = (usize, &'a mut T);
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(e) = self.iter.next() {
-            match e {
+        let mut e_opt = self.iter.next();
+        while let Some(e) = e_opt {
+            e_opt = match e {
                 (key, Entry::Occupied(value)) => {
                     self.used += 1;
                     return Some((key, value));
                 }
-                (_, Entry::VacantHead { vacant_body_len }) => {
-                    self.iter.nth(*vacant_body_len);
-                }
-                (_, Entry::VacantTail { .. }) => {}
+                (_, Entry::VacantHead { vacant_body_len }) => self.iter.nth(*vacant_body_len + 1),
+                (_, Entry::VacantTail { .. }) => self.iter.next(),
             }
         }
         None
     }
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len - self.used;
         (len, Some(len))
@@ -437,22 +440,22 @@ pub struct Values<'a, T> {
 }
 impl<'a, T> Iterator for Values<'a, T> {
     type Item = &'a T;
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(e) = self.iter.next() {
-            match e {
+        let mut e_opt = self.iter.next();
+        while let Some(e) = e_opt {
+            e_opt = match e {
                 Entry::Occupied(value) => {
                     self.used += 1;
                     return Some(value);
                 }
-                Entry::VacantHead { vacant_body_len } => {
-                    // call `nth(*vacant_body_len) & next()` is faster than call `nth(*vacant_body_len + 1)`.
-                    self.iter.nth(*vacant_body_len);
-                }
-                Entry::VacantTail { .. } => {}
+                Entry::VacantHead { vacant_body_len } => self.iter.nth(*vacant_body_len + 1),
+                Entry::VacantTail { .. } => self.iter.next(),
             }
         }
         None
     }
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len - self.used;
         (len, Some(len))
@@ -474,22 +477,22 @@ pub struct ValuesMut<'a, T> {
 }
 impl<'a, T> Iterator for ValuesMut<'a, T> {
     type Item = &'a mut T;
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(e) = self.iter.next() {
-            match e {
+        let mut e_opt = self.iter.next();
+        while let Some(e) = e_opt {
+            e_opt = match e {
                 Entry::Occupied(value) => {
                     self.used += 1;
                     return Some(value);
                 }
-                Entry::VacantHead { vacant_body_len } => {
-                    // call `nth(*vacant_body_len) & next()` is faster than call `nth(*vacant_body_len + 1)`.
-                    self.iter.nth(*vacant_body_len);
-                }
-                Entry::VacantTail { .. } => {}
+                Entry::VacantHead { vacant_body_len } => self.iter.nth(*vacant_body_len + 1),
+                Entry::VacantTail { .. } => self.iter.next(),
             }
         }
         None
     }
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len - self.used;
         (len, Some(len))
