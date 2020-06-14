@@ -294,7 +294,11 @@ impl<T> Slab<T> {
 
     /// Gets an iterator over the values of the slab.
     pub fn values(&self) -> impl Iterator<Item = &T> {
-        self.iter().map(|x| x.1)
+        Values {
+            iter: self.entries.iter(),
+            len: self.len,
+            used: 0,
+        }
     }
 }
 impl<T> Default for Slab<T> {
@@ -417,3 +421,40 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 }
 impl<'a, T> FusedIterator for IterMut<'a, T> {}
 impl<'a, T> ExactSizeIterator for IterMut<'a, T> {}
+
+pub struct Values<'a, T> {
+    iter: std::slice::Iter<'a, Entry<T>>,
+    len: usize,
+    used: usize,
+}
+impl<'a, T> Iterator for Values<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(e) = self.iter.next() {
+            match e {
+                Entry::Occupied(value) => {
+                    self.used += 1;
+                    return Some(value);
+                }
+                Entry::VacantHead { vacant_body_len } => {
+                    // call `nth(*vacant_body_len) & next()` is faster than call `nth(*vacant_body_len + 1)`.
+                    self.iter.nth(*vacant_body_len);
+                }
+                Entry::VacantTail { .. } => {}
+            }
+        }
+        None
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.len - self.used;
+        (len, Some(len))
+    }
+    fn count(self) -> usize
+    where
+        Self: Sized,
+    {
+        self.len - self.used
+    }
+}
+impl<'a, T> FusedIterator for Values<'a, T> {}
+impl<'a, T> ExactSizeIterator for Values<'a, T> {}
