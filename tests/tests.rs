@@ -37,6 +37,7 @@ impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
         }
     }
     pub fn check(&mut self, log: bool) {
+        assert_eq!(self.slab.len(), self.m.len(), "len");
         let mut l: Vec<_> = self
             .slab
             .iter()
@@ -124,6 +125,16 @@ fn test_x1() {
     ];
     do_actions(&actions, false);
 }
+#[test]
+fn test_x2() {
+    use Action::*;
+    let actions = vec![Insert, Insert, Insert, Remove(0), Remove(1)];
+    do_actions(&actions, false);
+}
 
 #[test]
-fn test_xx() {}
+fn test_xx() {
+    // use Action::*;
+    // let actions = vec![Insert];
+    // do_actions(&actions, true);
+}
