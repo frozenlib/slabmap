@@ -56,6 +56,7 @@ enum Entry<T> {
 impl<T> Slab<T> {
     /// Constructs a new, empty Slab<T>.
     /// The slab will not allocate until elements are pushed onto it.
+    #[inline]
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
@@ -66,16 +67,19 @@ impl<T> Slab<T> {
     }
 
     /// Returns the number of elements in the slab.
+    #[inline]
     pub fn len(&self) -> usize {
         self.len
     }
 
     /// Returns true if the slab contains no elements.
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
 
     /// Returns a reference to the value corresponding to the key.
+    #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
         if let Entry::Occupied(value) = self.entries.get(index)? {
             Some(value)
@@ -85,6 +89,7 @@ impl<T> Slab<T> {
     }
 
     /// Returns a mutable reference to the value corresponding to the key.
+    #[inline]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if let Entry::Occupied(value) = self.entries.get_mut(index)? {
             Some(value)
@@ -241,6 +246,7 @@ impl<T> Slab<T> {
     /// Gets an iterator over the entries of the slab, sorted by key.
     ///
     /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
+    #[inline]
     pub fn iter(&self) -> Iter<T> {
         Iter {
             iter: self.entries.iter().enumerate(),
@@ -252,6 +258,7 @@ impl<T> Slab<T> {
     /// Gets a mutable iterator over the entries of the slab, sorted by key.
     ///
     /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
+    #[inline]
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut {
             iter: self.entries.iter_mut().enumerate(),
@@ -261,11 +268,17 @@ impl<T> Slab<T> {
     }
 
     /// Gets an iterator over the keys of the slab, in sorted order.
-    pub fn keys<'a>(&'a self) -> impl Iterator<Item = usize> + 'a {
-        self.iter().map(|x| x.0)
+    #[inline]
+    pub fn keys(&self) -> Keys<T> {
+        Keys {
+            iter: self.entries.iter().enumerate(),
+            len: self.len,
+            used: 0,
+        }
     }
 
     /// Gets an iterator over the values of the slab.
+    #[inline]
     pub fn values(&self) -> Values<T> {
         Values {
             iter: self.entries.iter(),
@@ -275,6 +288,7 @@ impl<T> Slab<T> {
     }
 
     /// Gets a mutable iterator over the values of the slab.
+    #[inline]
     pub fn values_mut(&mut self) -> ValuesMut<T> {
         ValuesMut {
             iter: self.entries.iter_mut(),
@@ -305,11 +319,14 @@ impl<T: Debug> Debug for Slab<T> {
 
 impl<T> std::ops::Index<usize> for Slab<T> {
     type Output = T;
+
+    #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         self.get(index).expect("out of index.")
     }
 }
 impl<T> std::ops::IndexMut<usize> for Slab<T> {
+    #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.get_mut(index).expect("out of index.")
     }
@@ -318,6 +335,8 @@ impl<T> std::ops::IndexMut<usize> for Slab<T> {
 impl<'a, T> IntoIterator for &'a Slab<T> {
     type Item = (usize, &'a T);
     type IntoIter = Iter<'a, T>;
+
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -325,6 +344,8 @@ impl<'a, T> IntoIterator for &'a Slab<T> {
 impl<'a, T> IntoIterator for &'a mut Slab<T> {
     type Item = (usize, &'a mut T);
     type IntoIter = IterMut<'a, T>;
+
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.iter_mut()
     }
@@ -405,6 +426,43 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 }
 impl<'a, T> FusedIterator for IterMut<'a, T> {}
 impl<'a, T> ExactSizeIterator for IterMut<'a, T> {}
+
+pub struct Keys<'a, T> {
+    iter: std::iter::Enumerate<std::slice::Iter<'a, Entry<T>>>,
+    len: usize,
+    used: usize,
+}
+impl<'a, T> Iterator for Keys<'a, T> {
+    type Item = usize;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut e_opt = self.iter.next();
+        while let Some(e) = e_opt {
+            e_opt = match e {
+                (key, Entry::Occupied(_)) => {
+                    self.used += 1;
+                    return Some(key);
+                }
+                (_, Entry::VacantHead { vacant_body_len }) => self.iter.nth(*vacant_body_len + 1),
+                (_, Entry::VacantTail { .. }) => self.iter.next(),
+            }
+        }
+        None
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.len - self.used;
+        (len, Some(len))
+    }
+    fn count(self) -> usize
+    where
+        Self: Sized,
+    {
+        self.len - self.used
+    }
+}
+impl<'a, T> FusedIterator for Keys<'a, T> {}
+impl<'a, T> ExactSizeIterator for Keys<'a, T> {}
 
 pub struct Values<'a, T> {
     iter: std::slice::Iter<'a, Entry<T>>,
