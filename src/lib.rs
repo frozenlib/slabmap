@@ -80,8 +80,8 @@ impl<T> Slab<T> {
 
     /// Returns a reference to the value corresponding to the key.
     #[inline]
-    pub fn get(&self, index: usize) -> Option<&T> {
-        if let Entry::Occupied(value) = self.entries.get(index)? {
+    pub fn get(&self, key: usize) -> Option<&T> {
+        if let Entry::Occupied(value) = self.entries.get(key)? {
             Some(value)
         } else {
             None
@@ -90,8 +90,8 @@ impl<T> Slab<T> {
 
     /// Returns a mutable reference to the value corresponding to the key.
     #[inline]
-    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
-        if let Entry::Occupied(value) = self.entries.get_mut(index)? {
+    pub fn get_mut(&mut self, key: usize) -> Option<&mut T> {
+        if let Entry::Occupied(value) = self.entries.get_mut(key)? {
             Some(value)
         } else {
             None
@@ -101,7 +101,7 @@ impl<T> Slab<T> {
     /// Inserts a value into the slab.
     ///
     /// Returns the key associated with the value.
-    pub fn insert(&mut self, value: T) -> usize {
+    pub fn insert(&mut self, key: T) -> usize {
         let idx;
         if self.idx_next_vacant < self.entries.len() {
             idx = self.idx_next_vacant;
@@ -117,27 +117,27 @@ impl<T> Slab<T> {
                 Entry::VacantTail { idx_next_vacant } => idx_next_vacant,
                 Entry::Occupied(_) => unreachable!(),
             };
-            self.entries[idx] = Entry::Occupied(value);
+            self.entries[idx] = Entry::Occupied(key);
             self.non_optimized = self.non_optimized.saturating_sub(1);
         } else {
             idx = self.entries.len();
-            self.entries.push(Entry::Occupied(value));
+            self.entries.push(Entry::Occupied(key));
         }
         self.len += 1;
         idx
     }
 
     /// Removes a key from the slab, returning the value at the key if the key was previously in the slab.
-    pub fn remove(&mut self, index: usize) -> Option<T> {
-        let is_last = index + 1 == self.entries.len();
-        let e = self.entries.get_mut(index)?;
+    pub fn remove(&mut self, key: usize) -> Option<T> {
+        let is_last = key + 1 == self.entries.len();
+        let e = self.entries.get_mut(key)?;
         if !matches!(e, Entry::Occupied(..)) {
             return None;
         }
         self.len -= 1;
         let e = if is_last {
             let e = self.entries.pop().unwrap();
-            if index == 0 {
+            if key == 0 {
                 self.entries.clear();
             }
             e
@@ -148,7 +148,7 @@ impl<T> Slab<T> {
                     idx_next_vacant: self.idx_next_vacant,
                 },
             );
-            self.idx_next_vacant = index;
+            self.idx_next_vacant = key;
             self.non_optimized += 1;
             e
         };
