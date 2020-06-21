@@ -162,9 +162,9 @@ impl<T> Slab<T> {
     /// Clears the slab, removing all values and optimize free spaces.
     pub fn clear(&mut self) {
         self.entries.clear();
+        self.len = 0;
         self.idx_next_vacant = INVALID_INDEX;
         self.non_optimized = 0;
-        self.len = 0;
     }
 
     /// Clears the Slab, returning all values as an iterator.
