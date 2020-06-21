@@ -24,8 +24,14 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             b.iter(|| T::new_n(n))
         }
     }
-    Insert::register(c, "insert_large", &inputs_large());
     Insert::register(c, "insert_small", &inputs_small());
+    Insert::register(c, "insert_large", &inputs_large());
+    Insert::register_with(
+        c,
+        "insert_large_fast_only",
+        &inputs_large(),
+        BenchTargets::DEFAULT.no_map(),
+    );
 
     struct InsertNoAlloc;
     impl BenchFunc for InsertNoAlloc {
@@ -40,7 +46,13 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             })
         }
     }
-    InsertNoAlloc::register(c, "insert_small_no_alloc", &inputs_small());
+    InsertNoAlloc::register(c, "insert_small_with_capacity", &inputs_small());
+    InsertNoAlloc::register_with(
+        c,
+        "insert_small_with_capacity_fast_only",
+        &inputs_small(),
+        BenchTargets::DEFAULT.no_map(),
+    );
 
     struct RemoveFront;
     impl BenchFunc for RemoveFront {
@@ -56,6 +68,12 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         }
     }
     RemoveFront::register(c, "remove_front", &inputs_large());
+    RemoveFront::register_with(
+        c,
+        "remove_front_fast_only",
+        &inputs_large(),
+        BenchTargets::DEFAULT.no_vec(),
+    );
 
     struct RemoveBack;
     impl BenchFunc for RemoveBack {
@@ -71,6 +89,12 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         }
     }
     RemoveBack::register(c, "remove_back", &inputs_large());
+    RemoveBack::register_with(
+        c,
+        "remove_back",
+        &inputs_large(),
+        BenchTargets::DEFAULT.no_map(),
+    );
 
     struct RemoveRandom;
     impl BenchFunc for RemoveRandom {
@@ -86,7 +110,14 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             })
         }
     }
-    RemoveRandom::register_with(c, "remove_random", &inputs_large(), false, false);
+    RemoveRandom::register(c, "remove_random_small", &inputs_small());
+    RemoveRandom::register(c, "remove_random_large", &inputs_large());
+    RemoveRandom::register_with(
+        c,
+        "remove_random_large_fast_only",
+        &inputs_large(),
+        BenchTargets::DEFAULT.no_vec(),
+    );
 
     struct GetSeq;
     impl BenchFunc for GetSeq {
@@ -102,6 +133,12 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         }
     }
     GetSeq::register(c, "get_sequential", &inputs_large());
+    GetSeq::register_with(
+        c,
+        "get_sequential_fast_only",
+        &inputs_large(),
+        BenchTargets::DEFAULT.no_map(),
+    );
 
     struct GetRandom;
     impl BenchFunc for GetRandom {
@@ -118,30 +155,74 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         }
     }
     GetRandom::register(c, "get_random", &inputs_large());
+    GetRandom::register_with(
+        c,
+        "get_random_fast_only",
+        &inputs_large(),
+        BenchTargets::DEFAULT.no_map(),
+    );
 
-    struct Iter;
-    impl BenchFunc for Iter {
+    struct IterValues;
+    impl BenchFunc for IterValues {
         fn bench<T: BenchTarget>(b: &mut Bencher, n: usize) {
             let c = T::new_n(n);
             b.iter(|| c.values())
         }
     }
-    Iter::register(c, "iter", &inputs_large());
+    IterValues::register(c, "iter_values", &inputs_large());
 
-    struct IterSparse;
-    impl BenchFunc for IterSparse {
+    struct IterValuesSparse;
+    impl BenchFunc for IterValuesSparse {
         fn bench<T: BenchTarget>(b: &mut Bencher, n: usize) {
-            let m = 10000;
-            let mut c = T::new_n(m);
-            let keys = make_random_keys(m);
-            for i in n..m {
-                c.remove(keys[i]);
-            }
+            let mut c = T::new_n_retain(10000, n);
             c.optimize();
             b.iter(|| c.values())
         }
     }
-    IterSparse::register_with(c, "iter-sparse", &inputs_large(), false, true);
+    IterValuesSparse::register_with(c, "iter_values_removed", &inputs_large(), BenchTargets::ALL);
+    IterValuesSparse::register_with(c, "iter_values_sparse", &inputs_small(), BenchTargets::ALL);
+    IterValuesSparse::register_with(
+        c,
+        "iter_values_sparse_fast_only",
+        &inputs_small(),
+        BenchTargets::ALL.no_slab(),
+    );
+
+    struct IterKeyValues;
+    impl BenchFunc for IterKeyValues {
+        fn bench<T: BenchTarget>(b: &mut Bencher, n: usize) {
+            let c = T::new_n(n);
+            b.iter(|| c.key_values())
+        }
+    }
+    IterKeyValues::register(c, "iter_key_values", &inputs_large());
+
+    struct IterKeyValuesSparse;
+    impl BenchFunc for IterKeyValuesSparse {
+        fn bench<T: BenchTarget>(b: &mut Bencher, n: usize) {
+            let mut c = T::new_n_retain(10000, n);
+            c.optimize();
+            b.iter(|| c.key_values())
+        }
+    }
+    IterKeyValuesSparse::register_with(
+        c,
+        "iter_key_values_removed",
+        &inputs_large(),
+        BenchTargets::ALL,
+    );
+    IterKeyValuesSparse::register_with(
+        c,
+        "iter_key_values_sparse",
+        &inputs_small(),
+        BenchTargets::ALL,
+    );
+    IterKeyValuesSparse::register_with(
+        c,
+        "iter_key_values_sparse_fast_only",
+        &inputs_small(),
+        BenchTargets::ALL.no_slab(),
+    );
 }
 
 trait BenchFunc {
@@ -150,33 +231,100 @@ trait BenchFunc {
     fn bench_as<T: BenchTarget>(g: &mut BenchmarkGroup<WallTime>, input: usize) {
         g.bench_with_input(T::id(input), &input, |b, n| Self::bench::<T>(b, *n));
     }
-
-    fn register(c: &mut Criterion, name: &str, inputs: &[usize]) {
-        Self::register_with(c, name, inputs, true, false)
+    fn not_available<T: BenchTarget>(g: &mut BenchmarkGroup<WallTime>) {
+        let input = 0usize;
+        g.bench_with_input(
+            BenchmarkId::new(&format!("{} - not supported", T::NAME), input),
+            &input,
+            |b, _| b.iter(|| {}),
+        );
     }
 
-    fn register_with(
-        c: &mut Criterion,
-        name: &str,
-        inputs: &[usize],
-        include_vec: bool,
-        include_optimized: bool,
-    ) {
+    fn register(c: &mut Criterion, name: &str, inputs: &[usize]) {
+        Self::register_with(c, name, inputs, BenchTargets::DEFAULT)
+    }
+
+    fn register_with(c: &mut Criterion, name: &str, inputs: &[usize], targets: BenchTargets) {
         let mut g = c.benchmark_group(name);
+        if !targets.vec {
+            Self::not_available::<Vec<usize>>(&mut g);
+        }
+        if !targets.hash_map {
+            Self::not_available::<HashMap<usize, usize>>(&mut g);
+        }
+        if !targets.btree_map {
+            Self::not_available::<BTreeMap<usize, usize>>(&mut g);
+        }
+        if !targets.slab {
+            Self::not_available::<slab::Slab<usize>>(&mut g);
+        }
+        if !targets.slab_iter {
+            Self::not_available::<slab_iter::Slab<usize>>(&mut g);
+        }
         for &input in inputs {
-            if include_vec {
+            if targets.vec {
                 Self::bench_as::<Vec<usize>>(&mut g, input);
             }
-            Self::bench_as::<HashMap<usize, usize>>(&mut g, input);
-            Self::bench_as::<BTreeMap<usize, usize>>(&mut g, input);
-            Self::bench_as::<slab_iter::Slab<usize>>(&mut g, input);
-            if include_optimized {
+            if targets.hash_map {
+                Self::bench_as::<HashMap<usize, usize>>(&mut g, input);
+            }
+            if targets.btree_map {
+                Self::bench_as::<BTreeMap<usize, usize>>(&mut g, input);
+            }
+            if targets.slab {
+                Self::bench_as::<slab::Slab<usize>>(&mut g, input);
+            }
+            if targets.slab_iter {
+                Self::bench_as::<slab_iter::Slab<usize>>(&mut g, input);
+            }
+            if targets.slab_iter_optimized {
                 Self::bench_as::<OptimizedSlab>(&mut g, input);
             }
-            Self::bench_as::<slab::Slab<usize>>(&mut g, input);
         }
     }
 }
+
+#[derive(Copy, Clone)]
+struct BenchTargets {
+    vec: bool,
+    hash_map: bool,
+    btree_map: bool,
+    slab: bool,
+    slab_iter: bool,
+    slab_iter_optimized: bool,
+}
+impl BenchTargets {
+    const DEFAULT: Self = Self {
+        slab_iter_optimized: false,
+        ..Self::ALL
+    };
+    const ALL: Self = Self {
+        vec: true,
+        hash_map: true,
+        btree_map: true,
+        slab: true,
+        slab_iter: true,
+        slab_iter_optimized: true,
+    };
+    fn no_vec(self) -> Self {
+        Self { vec: false, ..self }
+    }
+    fn no_map(self) -> Self {
+        Self {
+            hash_map: false,
+            btree_map: false,
+            ..self
+        }
+    }
+    fn no_slab(self) -> Self {
+        Self {
+            slab: false,
+            slab_iter: false,
+            ..self
+        }
+    }
+}
+
 trait BenchTarget: Clone {
     const NAME: &'static str;
     fn id(p: usize) -> BenchmarkId {
@@ -188,6 +336,7 @@ trait BenchTarget: Clone {
     fn remove(&mut self, n: usize);
     fn clear(&mut self);
     fn values(&self) -> usize;
+    fn key_values(&self) -> usize;
     fn get(&self, i: usize) -> usize;
 
     #[inline]
@@ -195,6 +344,14 @@ trait BenchTarget: Clone {
         let mut s = Self::new();
         for i in 0..n {
             s.insert(i);
+        }
+        s
+    }
+    fn new_n_retain(n: usize, m: usize) -> Self {
+        let mut s = Self::new_n(n);
+        let keys = make_random_keys(n);
+        for i in m..n {
+            s.remove(keys[i]);
         }
         s
     }
@@ -223,8 +380,9 @@ impl BenchTarget for Vec<usize> {
         self.push(n)
     }
     #[inline]
-    fn remove(&mut self, _n: usize) {
-        panic!("not supported");
+    fn remove(&mut self, n: usize) {
+        let idx = self.iter().position(|&x| x == n).unwrap();
+        self.remove(idx);
     }
     #[inline]
     fn clear(&mut self) {
@@ -235,8 +393,18 @@ impl BenchTarget for Vec<usize> {
         self.iter().sum()
     }
     #[inline]
+    fn key_values(&self) -> usize {
+        self.iter().enumerate().fold(0, |s, (k, v)| s + k + v)
+    }
+    #[inline]
     fn get(&self, i: usize) -> usize {
         self[i]
+    }
+
+    fn new_n_retain(n: usize, m: usize) -> Self {
+        let mut s = Self::new_n(n);
+        s.truncate(m);
+        s
     }
 
     #[inline]
@@ -272,6 +440,10 @@ impl BenchTarget for HashMap<usize, usize> {
         self.values().sum()
     }
     #[inline]
+    fn key_values(&self) -> usize {
+        self.iter().fold(0, |s, (k, v)| s + k + v)
+    }
+    #[inline]
     fn get(&self, i: usize) -> usize {
         self[&i]
     }
@@ -300,6 +472,10 @@ impl BenchTarget for BTreeMap<usize, usize> {
         self.values().sum()
     }
     #[inline]
+    fn key_values(&self) -> usize {
+        self.iter().fold(0, |s, (k, v)| s + k + v)
+    }
+    #[inline]
     fn get(&self, i: usize) -> usize {
         self[&i]
     }
@@ -326,6 +502,10 @@ impl BenchTarget for slab_iter::Slab<usize> {
     #[inline]
     fn values(&self) -> usize {
         self.values().sum()
+    }
+    #[inline]
+    fn key_values(&self) -> usize {
+        self.iter().fold(0, |s, (k, v)| s + k + v)
     }
     #[inline]
     fn get(&self, i: usize) -> usize {
@@ -360,6 +540,10 @@ impl BenchTarget for OptimizedSlab {
         self.0.values().sum()
     }
     #[inline]
+    fn key_values(&self) -> usize {
+        self.0.iter().fold(0, |s, (k, v)| s + k + v)
+    }
+    #[inline]
     fn get(&self, i: usize) -> usize {
         self.0[i]
     }
@@ -391,6 +575,10 @@ impl BenchTarget for slab::Slab<usize> {
     #[inline]
     fn values(&self) -> usize {
         self.iter().map(|x| x.1).sum()
+    }
+    #[inline]
+    fn key_values(&self) -> usize {
+        self.iter().fold(0, |s, (k, v)| s + k + v)
     }
     #[inline]
     fn get(&self, i: usize) -> usize {

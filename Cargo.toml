@@ -26,5 +26,5 @@ name = "benchmarks"
 harness = false
 
 [[bench]]
-name = "doc"
+name = "compare"
 harness = false

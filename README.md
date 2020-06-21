@@ -13,19 +13,30 @@ This crate provides the type `Slab`.
 - The key of `Slab` is determined automatically.
 - `Slab` runs faster than `HashMap`.
 
-The following chart shows the difference in performance between `Slab`, `HashMap` and `BTreeMap`.
-
-## TODO(graph)
-
 ## Comparison with Similar Crates
 
 - [`slab`](https://crates.io/crates/slab), Carl Lerche's slab crate provides a slab implementation with a similar API.
 
   For both `slab` and `slab-iter`, after adding many elements to the collection, removing many element will reduce iterate performance.
 
-  However, unlike `slab`, `slab-iter` can restore iterate performance by calling `Slab::optimize`.
+  However, unlike `slab`, `slab-iter` can improve iterate performance by calling `slab_iter::Slab::optimize`.
 
-## TODO(graph2)
+## Performance
+
+The following chart shows the difference in performance between `slab_iter::Slab`, `slab::Slab`, `Vec`, `HashMap` and `BTreeMap`.
+
+### Insert
+
+### Remove random elements
+
+### Random access
+
+### Sequential access
+
+### Sequential access after remove many elements
+
+- x-axis : number of remaining elements
+- y-axis : duration (lower is better)
 
 ## Install
 
