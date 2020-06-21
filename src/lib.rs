@@ -166,6 +166,18 @@ impl<T> Slab<T> {
         self.non_optimized = 0;
     }
 
+    /// Clears the Slab, returning all values as an iterator.
+    pub fn drain(&mut self) -> Drain<T> {
+        let len = self.len;
+        self.len = 0;
+        self.idx_next_vacant = INVALID_INDEX;
+        self.non_optimized = 0;
+        Drain {
+            iter: self.entries.drain(..),
+            len,
+        }
+    }
+
     /// Retains only the elements specified by the predicate and optimize free spaces.
     ///
     /// ```
@@ -348,6 +360,38 @@ pub struct IntoIter<T> {
     len: usize,
 }
 impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut e_opt = self.iter.next();
+        while let Some(e) = e_opt {
+            e_opt = match e {
+                Entry::Occupied(value) => {
+                    self.len -= 1;
+                    return Some(value);
+                }
+                Entry::VacantHead { vacant_body_len } => self.iter.nth(vacant_body_len + 1),
+                Entry::VacantTail { .. } => self.iter.next(),
+            }
+        }
+        None
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+    fn count(self) -> usize
+    where
+        Self: Sized,
+    {
+        self.len
+    }
+}
+pub struct Drain<'a, T> {
+    iter: std::vec::Drain<'a, Entry<T>>,
+    len: usize,
+}
+impl<'a, T> Iterator for Drain<'a, T> {
     type Item = T;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
