@@ -313,6 +313,17 @@ impl<T> std::ops::IndexMut<usize> for Slab<T> {
     }
 }
 
+impl<T> IntoIterator for Slab<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter {
+            iter: self.entries.into_iter(),
+            len: self.len,
+        }
+    }
+}
+
 impl<'a, T> IntoIterator for &'a Slab<T> {
     type Item = (usize, &'a T);
     type IntoIter = Iter<'a, T>;
@@ -329,6 +340,39 @@ impl<'a, T> IntoIterator for &'a mut Slab<T> {
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.iter_mut()
+    }
+}
+
+pub struct IntoIter<T> {
+    iter: std::vec::IntoIter<Entry<T>>,
+    len: usize,
+}
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut e_opt = self.iter.next();
+        while let Some(e) = e_opt {
+            e_opt = match e {
+                Entry::Occupied(value) => {
+                    self.len -= 1;
+                    return Some(value);
+                }
+                Entry::VacantHead { vacant_body_len } => self.iter.nth(vacant_body_len + 1),
+                Entry::VacantTail { .. } => self.iter.next(),
+            }
+        }
+        None
+    }
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+    fn count(self) -> usize
+    where
+        Self: Sized,
+    {
+        self.len
     }
 }
 
