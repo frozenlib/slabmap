@@ -201,7 +201,6 @@ impl<T> Slab<T> {
                         idx += 1;
                         idx_vacant_start = idx;
                     } else {
-                        drop(value);
                         self.entries[idx] = Entry::VacantTail {
                             idx_next_vacant: INVALID_INDEX,
                         };
@@ -227,7 +226,7 @@ impl<T> Slab<T> {
     }
     fn merge_vacant(&mut self, start: usize, end: usize) {
         if start < end {
-            if start + 2 <= end {
+            if start < end - 1 {
                 self.entries[start] = Entry::VacantHead {
                     vacant_body_len: end - start - 2,
                 }
