@@ -19,7 +19,7 @@ impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
         let key = self.slab.insert(value.clone());
         self.m.insert(key, value.clone());
         if log {
-            eprintln!("Insert({:?}) -> {}", value, key);
+            eprintln!("insert({:?}) -> {}", value, key);
         }
     }
     pub fn remove(&mut self, key: usize, log: bool) {
@@ -28,6 +28,13 @@ impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
         assert_eq!(l, r, "remove {}", key);
         if log {
             eprintln!("remove({}) -> {:?}", key, l);
+        }
+    }
+    pub fn clear(&mut self, log: bool) {
+        self.slab.clear();
+        self.m.clear();
+        if log {
+            eprintln!("clear");
         }
     }
     pub fn optimize(&mut self, log: bool) {
@@ -69,6 +76,7 @@ impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
 enum Action {
     Insert,
     Remove(usize),
+    Clear,
     Optimize,
 }
 fn do_actions(actions: &[Action], log: bool) {
@@ -78,6 +86,7 @@ fn do_actions(actions: &[Action], log: bool) {
         match a {
             Action::Insert => t.insert(c, log),
             Action::Remove(key) => t.remove(*key % (c + 2), log),
+            Action::Clear => t.clear(log),
             Action::Optimize => t.optimize(log),
         }
         t.check(log);
@@ -89,6 +98,7 @@ fn make_action(max_key: usize) -> impl Strategy<Value = Action> {
     prop_oneof![
         Just(Action::Insert),
         (0..max_key).prop_map(Action::Remove),
+        Just(Action::Clear),
         Just(Action::Optimize)
     ]
 }

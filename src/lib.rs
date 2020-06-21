@@ -164,6 +164,7 @@ impl<T> Slab<T> {
         self.entries.clear();
         self.idx_next_vacant = INVALID_INDEX;
         self.non_optimized = 0;
+        self.len = 0;
     }
 
     /// Clears the Slab, returning all values as an iterator.
