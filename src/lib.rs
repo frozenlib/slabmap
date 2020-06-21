@@ -246,7 +246,6 @@ impl<T> Slab<T> {
         Iter {
             iter: self.entries.iter().enumerate(),
             len: self.len,
-            used: 0,
         }
     }
 
@@ -258,7 +257,6 @@ impl<T> Slab<T> {
         IterMut {
             iter: self.entries.iter_mut().enumerate(),
             len: self.len,
-            used: 0,
         }
     }
 
@@ -338,7 +336,6 @@ impl<'a, T> IntoIterator for &'a mut Slab<T> {
 pub struct Iter<'a, T> {
     iter: std::iter::Enumerate<std::slice::Iter<'a, Entry<T>>>,
     len: usize,
-    used: usize,
 }
 impl<'a, T> Iterator for Iter<'a, T> {
     type Item = (usize, &'a T);
@@ -348,7 +345,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
         while let Some(e) = e_opt {
             e_opt = match e {
                 (key, Entry::Occupied(value)) => {
-                    self.used += 1;
+                    self.len -= 1;
                     return Some((key, value));
                 }
                 (_, Entry::VacantHead { vacant_body_len }) => self.iter.nth(*vacant_body_len + 1),
@@ -359,14 +356,13 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.len - self.used;
-        (len, Some(len))
+        (self.len, Some(self.len))
     }
     fn count(self) -> usize
     where
         Self: Sized,
     {
-        self.len - self.used
+        self.len
     }
 }
 impl<'a, T> FusedIterator for Iter<'a, T> {}
@@ -376,7 +372,6 @@ impl<'a, T> ExactSizeIterator for Iter<'a, T> {}
 pub struct IterMut<'a, T> {
     iter: std::iter::Enumerate<std::slice::IterMut<'a, Entry<T>>>,
     len: usize,
-    used: usize,
 }
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = (usize, &'a mut T);
@@ -386,7 +381,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
         while let Some(e) = e_opt {
             e_opt = match e {
                 (key, Entry::Occupied(value)) => {
-                    self.used += 1;
+                    self.len -= 1;
                     return Some((key, value));
                 }
                 (_, Entry::VacantHead { vacant_body_len }) => self.iter.nth(*vacant_body_len + 1),
@@ -397,14 +392,13 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     }
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.len - self.used;
-        (len, Some(len))
+        (self.len, Some(self.len))
     }
     fn count(self) -> usize
     where
         Self: Sized,
     {
-        self.len - self.used
+        self.len
     }
 }
 impl<'a, T> FusedIterator for IterMut<'a, T> {}
