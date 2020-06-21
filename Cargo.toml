@@ -22,7 +22,7 @@ rand = "0.7"
 bench = false
 
 [[bench]]
-name = "benchmarks"
+name = "regression"
 harness = false
 
 [[bench]]
