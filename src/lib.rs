@@ -210,7 +210,7 @@ impl<T> Slab<T> {
                 }
             }
         }
-        self.merge_vacant(idx_vacant_start, self.entries.len());
+        self.entries.truncate(idx_vacant_start);
         self.non_optimized = 0;
     }
 
@@ -227,19 +227,15 @@ impl<T> Slab<T> {
     }
     fn merge_vacant(&mut self, start: usize, end: usize) {
         if start < end {
-            if end == self.entries.len() {
-                self.entries.truncate(start);
-            } else {
-                if start + 2 <= end {
-                    self.entries[start] = Entry::VacantHead {
-                        vacant_body_len: end - start - 2,
-                    }
+            if start + 2 <= end {
+                self.entries[start] = Entry::VacantHead {
+                    vacant_body_len: end - start - 2,
                 }
-                self.entries[end - 1] = Entry::VacantTail {
-                    idx_next_vacant: self.idx_next_vacant,
-                };
-                self.idx_next_vacant = start;
             }
+            self.entries[end - 1] = Entry::VacantTail {
+                idx_next_vacant: self.idx_next_vacant,
+            };
+            self.idx_next_vacant = start;
         }
     }
 
