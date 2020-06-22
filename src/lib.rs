@@ -56,6 +56,35 @@ impl<T> Slab<T> {
         }
     }
 
+    /// Constructs a new, empty Slab<T> with the specified capacity.
+    #[inline]
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity),
+            idx_next_vacant: INVALID_INDEX,
+            len: 0,
+            non_optimized: 0,
+        }
+    }
+
+    /// Returns the number of elements the slab can hold without reallocating.
+    #[inline]
+    pub fn capacity(&self) -> usize {
+        self.entries.capacity()
+    }
+
+    /// Reserves capacity for at least additional more elements to be inserted in the given Slab<T>.
+    #[inline]
+    pub fn reserve(&mut self, additional: usize) {
+        self.entries.reserve(additional);
+    }
+
+    /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given Slab<T>.
+    #[inline]
+    pub fn reserve_exact(&mut self, additional: usize) {
+        self.entries.reserve_exact(additional);
+    }
+
     /// Returns the number of elements in the slab.
     ///
     /// # Examples
