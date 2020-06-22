@@ -26,16 +26,6 @@ assert_eq!(value, Some("aaa"));
 use std::{fmt::Debug, iter::FusedIterator, mem::replace};
 /**
 A fast HashMap-like collection that automatically determines the key.
-
-# computational complexity
-
-| method                       | computational complexity |
-| ---------------------------- | ------------------------ |
-| [`insert`](Self::insert)     | `O(1)`                   |
-| [`remove`](Self::remove)     | `O(1)`                   |
-| [`get`](Self::get)           | `O(1)`                   |
-| [`get_mut`](Self::get_mut)   | `O(1)`                   |
-| [`optimize`](Self::optimize) | `O(n)`, `n = self.len()` |
 */
 #[derive(Clone)]
 pub struct Slab<T> {
@@ -356,6 +346,9 @@ impl<'a, T> IntoIterator for &'a mut Slab<T> {
     }
 }
 
+/// An owning iterator over the values of a Slab.
+///
+/// This struct is created by the `into_iter` method on `Slab` (provided by the IntoIterator trait).
 pub struct IntoIter<T> {
     iter: std::vec::IntoIter<Entry<T>>,
     len: usize,
@@ -388,6 +381,10 @@ impl<T> Iterator for IntoIter<T> {
         self.len
     }
 }
+
+/// A draining iterator for Slab<T>.
+///
+/// This struct is created by the [`drain`](Slab::drain) method on [`Slab`].
 pub struct Drain<'a, T> {
     iter: std::vec::Drain<'a, Entry<T>>,
     len: usize,
@@ -493,6 +490,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 impl<'a, T> FusedIterator for IterMut<'a, T> {}
 impl<'a, T> ExactSizeIterator for IterMut<'a, T> {}
 
+/// An iterator over the keys of a Slab.
 pub struct Keys<'a, T>(Iter<'a, T>);
 impl<'a, T> Iterator for Keys<'a, T> {
     type Item = usize;
@@ -514,6 +512,7 @@ impl<'a, T> Iterator for Keys<'a, T> {
 impl<'a, T> FusedIterator for Keys<'a, T> {}
 impl<'a, T> ExactSizeIterator for Keys<'a, T> {}
 
+/// An iterator over the values of a Slab.
 pub struct Values<'a, T>(Iter<'a, T>);
 impl<'a, T> Iterator for Values<'a, T> {
     type Item = &'a T;
@@ -535,6 +534,7 @@ impl<'a, T> Iterator for Values<'a, T> {
 impl<'a, T> FusedIterator for Values<'a, T> {}
 impl<'a, T> ExactSizeIterator for Values<'a, T> {}
 
+/// A mutable iterator over the values of a Slab.
 pub struct ValuesMut<'a, T>(IterMut<'a, T>);
 impl<'a, T> Iterator for ValuesMut<'a, T> {
     type Item = &'a mut T;
