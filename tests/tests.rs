@@ -6,51 +6,53 @@ use std::fmt::Debug;
 struct Tester<T> {
     slab: Slab<T>,
     m: HashMap<usize, T>,
+    log: bool,
 }
 
 impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
-    pub fn new() -> Self {
+    pub fn new(log: bool) -> Self {
         Self {
             slab: Slab::new(),
             m: HashMap::new(),
+            log,
         }
     }
-    pub fn insert(&mut self, value: T, log: bool) {
+    pub fn insert(&mut self, value: T) {
         let key = self.slab.insert(value.clone());
         self.m.insert(key, value.clone());
-        if log {
+        if self.log {
             eprintln!("insert({:?}) -> {}", value, key);
         }
     }
-    pub fn remove(&mut self, key: usize, log: bool) {
+    pub fn remove(&mut self, key: usize) {
         let l = self.slab.remove(key);
         let r = self.m.remove(&key);
         assert_eq!(l, r, "remove {}", key);
-        if log {
+        if self.log {
             eprintln!("remove({}) -> {:?}", key, l);
         }
     }
-    pub fn clear(&mut self, log: bool) {
+    pub fn clear(&mut self) {
         self.slab.clear();
         self.m.clear();
-        if log {
+        if self.log {
             eprintln!("clear");
         }
     }
-    pub fn optimize(&mut self, log: bool) {
+    pub fn optimize(&mut self) {
         self.slab.optimize();
-        if log {
+        if self.log {
             eprintln!("optimize()");
         }
     }
-    pub fn reserve(&mut self, additional: usize, log: bool) {
+    pub fn reserve(&mut self, additional: usize) {
         self.slab.reserve(additional);
-        if log {
+        if self.log {
             eprintln!("reserve({})", additional);
         }
         assert!(self.slab.capacity() >= self.slab.len() + additional);
     }
-    pub fn check(&mut self, log: bool) {
+    pub fn check(&mut self) {
         assert_eq!(self.slab.len(), self.m.len(), "len");
         let mut l: Vec<_> = self
             .slab
@@ -73,7 +75,7 @@ impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
         assert_eq!(l, r, "items");
         assert_eq!(l_mut, r, "items mut");
 
-        if log {
+        if self.log {
             eprintln!("{:?}", l);
         }
     }
@@ -88,17 +90,17 @@ enum Action {
     Reserve(usize),
 }
 fn do_actions(actions: &[Action], log: bool) {
-    let mut t = Tester::new();
+    let mut t = Tester::new(log);
     let mut c = 0;
     for a in actions {
         match a {
-            Action::Insert => t.insert(c, log),
-            Action::Remove(key) => t.remove(*key % (c + 2), log),
-            Action::Clear => t.clear(log),
-            Action::Optimize => t.optimize(log),
-            Action::Reserve(additional) => t.reserve(*additional, log),
+            Action::Insert => t.insert(c),
+            Action::Remove(key) => t.remove(*key % (c + 2)),
+            Action::Clear => t.clear(),
+            Action::Optimize => t.optimize(),
+            Action::Reserve(additional) => t.reserve(*additional),
         }
-        t.check(log);
+        t.check();
         c += 1;
     }
 }
