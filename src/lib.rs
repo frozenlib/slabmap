@@ -57,6 +57,25 @@ impl<T> Slab<T> {
     }
 
     /// Returns the number of elements in the slab.
+    ///
+    /// # Examples
+    /// ```
+    /// use slab_iter::Slab;
+    ///
+    /// let mut s = Slab::new();
+    /// assert_eq!(s.len(), 0);
+    ///
+    /// let key1 = s.insert(10);
+    /// let key2 = s.insert(15);
+    ///
+    /// assert_eq!(s.len(), 2);
+    ///
+    /// s.remove(key1);
+    /// assert_eq!(s.len(), 1);
+    ///
+    /// s.remove(key2);
+    /// assert_eq!(s.len(), 0);
+    /// ```    
     #[inline]
     pub fn len(&self) -> usize {
         self.len
@@ -157,7 +176,7 @@ impl<T> Slab<T> {
         self.non_optimized = 0;
     }
 
-    /// Clears the Slab, returning all values as an iterator.
+    /// Clears the Slab, returning all values as an iterator and optimize free spaces.
     pub fn drain(&mut self) -> Drain<T> {
         let len = self.len;
         self.len = 0;
@@ -264,18 +283,24 @@ impl<T> Slab<T> {
     }
 
     /// Gets an iterator over the keys of the slab, in sorted order.
+    ///
+    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
     #[inline]
     pub fn keys(&self) -> Keys<T> {
         Keys(self.iter())
     }
 
     /// Gets an iterator over the values of the slab.
+    ///
+    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
     #[inline]
     pub fn values(&self) -> Values<T> {
         Values(self.iter())
     }
 
     /// Gets a mutable iterator over the values of the slab.
+    ///
+    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
     #[inline]
     pub fn values_mut(&mut self) -> ValuesMut<T> {
         ValuesMut(self.iter_mut())
@@ -348,7 +373,7 @@ impl<'a, T> IntoIterator for &'a mut Slab<T> {
 
 /// An owning iterator over the values of a Slab.
 ///
-/// This struct is created by the `into_iter` method on `Slab` (provided by the IntoIterator trait).
+/// This struct is created by the `into_iter` method on [`Slab`] (provided by the IntoIterator trait).
 pub struct IntoIter<T> {
     iter: std::vec::IntoIter<Entry<T>>,
     len: usize,
@@ -419,6 +444,8 @@ impl<'a, T> Iterator for Drain<'a, T> {
 }
 
 /// An iterator over the entries of a Slab.
+///
+/// This struct is created by the [`iter`](Slab::iter) method on [`Slab`].
 pub struct Iter<'a, T> {
     iter: std::iter::Enumerate<std::slice::Iter<'a, Entry<T>>>,
     len: usize,
@@ -455,6 +482,8 @@ impl<'a, T> FusedIterator for Iter<'a, T> {}
 impl<'a, T> ExactSizeIterator for Iter<'a, T> {}
 
 /// A mutable iterator over the entries of a Slab.
+///
+/// This struct is created by the [`iter_mut`](Slab::iter_mut) method on [`Slab`].
 pub struct IterMut<'a, T> {
     iter: std::iter::Enumerate<std::slice::IterMut<'a, Entry<T>>>,
     len: usize,
@@ -491,6 +520,8 @@ impl<'a, T> FusedIterator for IterMut<'a, T> {}
 impl<'a, T> ExactSizeIterator for IterMut<'a, T> {}
 
 /// An iterator over the keys of a Slab.
+///
+/// This struct is created by the [`keys`](Slab::keys) method on [`Slab`].
 pub struct Keys<'a, T>(Iter<'a, T>);
 impl<'a, T> Iterator for Keys<'a, T> {
     type Item = usize;
@@ -513,6 +544,8 @@ impl<'a, T> FusedIterator for Keys<'a, T> {}
 impl<'a, T> ExactSizeIterator for Keys<'a, T> {}
 
 /// An iterator over the values of a Slab.
+///
+/// This struct is created by the [`values`](Slab::values) method on [`Slab`].
 pub struct Values<'a, T>(Iter<'a, T>);
 impl<'a, T> Iterator for Values<'a, T> {
     type Item = &'a T;
@@ -535,6 +568,8 @@ impl<'a, T> FusedIterator for Values<'a, T> {}
 impl<'a, T> ExactSizeIterator for Values<'a, T> {}
 
 /// A mutable iterator over the values of a Slab.
+///
+/// This struct is created by the [`values_mut`](Slab::values_mut) method on [`Slab`].
 pub struct ValuesMut<'a, T>(IterMut<'a, T>);
 impl<'a, T> Iterator for ValuesMut<'a, T> {
     type Item = &'a mut T;
