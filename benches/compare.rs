@@ -14,7 +14,9 @@ fn inputs_small() -> Vec<usize> {
 }
 
 fn inputs_large() -> Vec<usize> {
-    (1..20usize).map(|x| x * 500).collect()
+    let mut inputs = vec![1];
+    inputs.extend((1..=20usize).map(|x| x * 500));
+    inputs
 }
 
 pub fn criterion_benchmark(c: &mut Criterion) {
