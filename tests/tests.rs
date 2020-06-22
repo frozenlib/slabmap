@@ -43,6 +43,13 @@ impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
             eprintln!("optimize()");
         }
     }
+    pub fn reserve(&mut self, additional: usize, log: bool) {
+        self.slab.reserve(additional);
+        if log {
+            eprintln!("reserve({})", additional);
+        }
+        assert!(self.slab.capacity() >= self.slab.len() + additional);
+    }
     pub fn check(&mut self, log: bool) {
         assert_eq!(self.slab.len(), self.m.len(), "len");
         let mut l: Vec<_> = self
@@ -78,6 +85,7 @@ enum Action {
     Remove(usize),
     Clear,
     Optimize,
+    Reserve(usize),
 }
 fn do_actions(actions: &[Action], log: bool) {
     let mut t = Tester::new();
@@ -88,6 +96,7 @@ fn do_actions(actions: &[Action], log: bool) {
             Action::Remove(key) => t.remove(*key % (c + 2), log),
             Action::Clear => t.clear(log),
             Action::Optimize => t.optimize(log),
+            Action::Reserve(additional) => t.reserve(*additional, log),
         }
         t.check(log);
         c += 1;
@@ -99,7 +108,8 @@ fn make_action(max_key: usize) -> impl Strategy<Value = Action> {
         Just(Action::Insert),
         (0..max_key).prop_map(Action::Remove),
         Just(Action::Clear),
-        Just(Action::Optimize)
+        Just(Action::Optimize),
+        (0..100usize).prop_map(Action::Reserve)
     ]
 }
 

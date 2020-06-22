@@ -74,15 +74,27 @@ impl<T> Slab<T> {
     }
 
     /// Reserves capacity for at least additional more elements to be inserted in the given Slab<T>.
+    ///
+    /// # Panics
+    /// Panics if the new capacity overflows usize.    
     #[inline]
     pub fn reserve(&mut self, additional: usize) {
-        self.entries.reserve(additional);
+        self.entries.reserve(self.entries_additional(additional));
     }
 
     /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given Slab<T>.
+    ///
+    /// # Panics
+    /// Panics if the new capacity overflows usize.    
     #[inline]
     pub fn reserve_exact(&mut self, additional: usize) {
-        self.entries.reserve_exact(additional);
+        self.entries
+            .reserve_exact(self.entries_additional(additional));
+    }
+
+    #[inline]
+    fn entries_additional(&self, additional: usize) -> usize {
+        additional.saturating_sub(self.entries.len() - self.len)
     }
 
     /// Returns the number of elements in the slab.
