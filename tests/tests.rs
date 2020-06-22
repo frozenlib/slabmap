@@ -148,3 +148,12 @@ fn test_xx() {
     // let actions = vec![Insert];
     // do_actions(&actions, true);
 }
+
+#[test]
+fn debug() {
+    let mut s = Slab::new();
+    s.insert(5);
+    s.insert(10);
+
+    assert_eq!(format!("{:?}", s), "{0: 5, 1: 10}");
+}

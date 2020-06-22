@@ -341,16 +341,7 @@ impl<T> Default for Slab<T> {
 }
 impl<T: Debug> Debug for Slab<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{{")?;
-        let mut is_first = true;
-        for (key, value) in self {
-            if is_first {
-                write!(f, " ,")?;
-                is_first = false;
-            }
-            write!(f, "{}: {:?}", key, value)?;
-        }
-        write!(f, "}}")
+        f.debug_map().entries(self.iter()).finish()
     }
 }
 
