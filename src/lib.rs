@@ -145,11 +145,7 @@ impl<T> Slab<T> {
         }
         self.len -= 1;
         let e = if is_last {
-            let e = self.entries.pop().unwrap();
-            if key == 0 {
-                self.entries.clear();
-            }
-            e
+            self.entries.pop().unwrap()
         } else {
             let e = replace(
                 e,
@@ -161,6 +157,9 @@ impl<T> Slab<T> {
             self.non_optimized += 1;
             e
         };
+        if self.is_empty() {
+            self.clear();
+        }
         if let Entry::Occupied(value) = e {
             Some(value)
         } else {
