@@ -27,6 +27,8 @@ The following chart shows the difference in performance between `slab_iter::Slab
 
 ### Insert
 
+![insert performance](https://raw.githubusercontent.com/frozenlib/slab-iter/images/bench/insert_large.svg?token=ACRPBIGGRPGVK7YZL7LZTVC67GB4K)
+
 ### Remove random elements
 
 ### Random access
