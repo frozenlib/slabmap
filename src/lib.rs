@@ -139,7 +139,7 @@ impl<T> Slab<T> {
     /// Inserts a value into the slab.
     ///
     /// Returns the key associated with the value.
-    pub fn insert(&mut self, key: T) -> usize {
+    pub fn insert(&mut self, value: T) -> usize {
         let idx;
         if self.idx_next_vacant < self.entries.len() {
             idx = self.idx_next_vacant;
@@ -155,11 +155,11 @@ impl<T> Slab<T> {
                 Entry::VacantTail { idx_next_vacant } => idx_next_vacant,
                 Entry::Occupied(_) => unreachable!(),
             };
-            self.entries[idx] = Entry::Occupied(key);
+            self.entries[idx] = Entry::Occupied(value);
             self.non_optimized = self.non_optimized.saturating_sub(1);
         } else {
             idx = self.entries.len();
-            self.entries.push(Entry::Occupied(key));
+            self.entries.push(Entry::Occupied(value));
         }
         self.len += 1;
         idx
