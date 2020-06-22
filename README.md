@@ -23,7 +23,7 @@ This crate provides the type `Slab`.
 
 ## Performance
 
-The following chart shows the difference in performance between `slab_iter::Slab`, `slab::Slab`, `Vec`, `HashMap` and `BTreeMap`.
+The following chart shows the difference in performance between `BTreeMap`, `HashMap`, `Vec`, `slab::Slab` and `slab_iter::Slab`.
 
 ### Insert
 
