@@ -107,11 +107,11 @@ fn do_actions(actions: &[Action], log: bool) {
 
 fn make_action(max_key: usize) -> impl Strategy<Value = Action> {
     prop_oneof![
-        Just(Action::Insert),
-        (0..max_key).prop_map(Action::Remove),
-        Just(Action::Clear),
-        Just(Action::Optimize),
-        (0..100usize).prop_map(Action::Reserve)
+        5 => Just(Action::Insert),
+        5 => (0..max_key).prop_map(Action::Remove),
+        1 => Just(Action::Clear),
+        1 => Just(Action::Optimize),
+        1 => (0..100usize).prop_map(Action::Reserve)
     ]
 }
 
