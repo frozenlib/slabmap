@@ -485,11 +485,11 @@ impl BenchTarget for BTreeMap<usize, usize> {
     }
 }
 impl BenchTarget for SlabMap<usize> {
-    const NAME: &'static str = "slab_map::Slab";
+    const NAME: &'static str = "SlabMap";
 
     #[inline]
     fn new() -> Self {
-        slab_map::SlabMap::new()
+        SlabMap::new()
     }
     #[inline]
     fn insert(&mut self, n: usize) {
@@ -521,11 +521,11 @@ impl BenchTarget for SlabMap<usize> {
 struct OptimizedSlab(SlabMap<usize>);
 
 impl BenchTarget for OptimizedSlab {
-    const NAME: &'static str = "slab_map::Slab(optimized)";
+    const NAME: &'static str = "SlabMap(optimized)";
 
     #[inline]
     fn new() -> Self {
-        OptimizedSlab(slab_map::SlabMap::new())
+        OptimizedSlab(SlabMap::new())
     }
     #[inline]
     fn insert(&mut self, n: usize) {
@@ -558,11 +558,11 @@ impl BenchTarget for OptimizedSlab {
 }
 
 impl BenchTarget for Slab<usize> {
-    const NAME: &'static str = "slab::Slab";
+    const NAME: &'static str = "Slab";
 
     #[inline]
     fn new() -> Self {
-        slab::SlabMap::new()
+        Slab::new()
     }
     #[inline]
     fn insert(&mut self, n: usize) {
