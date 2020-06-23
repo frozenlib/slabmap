@@ -30,7 +30,7 @@ A fast HashMap-like collection that automatically determines the key.
 #[derive(Clone)]
 pub struct SlabMap<T> {
     entries: Vec<Entry<T>>,
-    idx_next_vacant: usize,
+    next_vacant_idx: usize,
     len: usize,
     non_optimized: usize,
 }
@@ -40,7 +40,7 @@ const INVALID_INDEX: usize = usize::MAX;
 enum Entry<T> {
     Occupied(T),
     VacantHead { vacant_body_len: usize },
-    VacantTail { idx_next_vacant: usize },
+    VacantTail { next_vacant_idx: usize },
 }
 
 impl<T> SlabMap<T> {
@@ -50,7 +50,7 @@ impl<T> SlabMap<T> {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
-            idx_next_vacant: INVALID_INDEX,
+            next_vacant_idx: INVALID_INDEX,
             len: 0,
             non_optimized: 0,
         }
@@ -61,7 +61,7 @@ impl<T> SlabMap<T> {
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             entries: Vec::with_capacity(capacity),
-            idx_next_vacant: INVALID_INDEX,
+            next_vacant_idx: INVALID_INDEX,
             len: 0,
             non_optimized: 0,
         }
@@ -153,9 +153,9 @@ impl<T> SlabMap<T> {
     /// Returns the key associated with the value.
     pub fn insert(&mut self, value: T) -> usize {
         let idx;
-        if self.idx_next_vacant < self.entries.len() {
-            idx = self.idx_next_vacant;
-            self.idx_next_vacant = match self.entries[idx] {
+        if self.next_vacant_idx < self.entries.len() {
+            idx = self.next_vacant_idx;
+            self.next_vacant_idx = match self.entries[idx] {
                 Entry::VacantHead { vacant_body_len } => {
                     if vacant_body_len > 0 {
                         self.entries[idx + 1] = Entry::VacantHead {
@@ -164,7 +164,7 @@ impl<T> SlabMap<T> {
                     }
                     idx + 1
                 }
-                Entry::VacantTail { idx_next_vacant } => idx_next_vacant,
+                Entry::VacantTail { next_vacant_idx } => next_vacant_idx,
                 Entry::Occupied(_) => unreachable!(),
             };
             self.entries[idx] = Entry::Occupied(value);
@@ -191,10 +191,10 @@ impl<T> SlabMap<T> {
             let e = replace(
                 e,
                 Entry::VacantTail {
-                    idx_next_vacant: self.idx_next_vacant,
+                    next_vacant_idx: self.next_vacant_idx,
                 },
             );
-            self.idx_next_vacant = key;
+            self.next_vacant_idx = key;
             self.non_optimized += 1;
             e
         };
@@ -212,7 +212,7 @@ impl<T> SlabMap<T> {
     pub fn clear(&mut self) {
         self.entries.clear();
         self.len = 0;
-        self.idx_next_vacant = INVALID_INDEX;
+        self.next_vacant_idx = INVALID_INDEX;
         self.non_optimized = 0;
     }
 
@@ -220,7 +220,7 @@ impl<T> SlabMap<T> {
     pub fn drain(&mut self) -> Drain<T> {
         let len = self.len;
         self.len = 0;
-        self.idx_next_vacant = INVALID_INDEX;
+        self.next_vacant_idx = INVALID_INDEX;
         self.non_optimized = 0;
         Drain {
             iter: self.entries.drain(..),
@@ -248,7 +248,7 @@ impl<T> SlabMap<T> {
         let mut f = f;
         let mut idx = 0;
         let mut idx_vacant_start = 0;
-        self.idx_next_vacant = INVALID_INDEX;
+        self.next_vacant_idx = INVALID_INDEX;
         while let Some(e) = self.entries.get_mut(idx) {
             match e {
                 Entry::VacantTail { .. } => {
@@ -264,7 +264,7 @@ impl<T> SlabMap<T> {
                         idx_vacant_start = idx;
                     } else {
                         self.entries[idx] = Entry::VacantTail {
-                            idx_next_vacant: INVALID_INDEX,
+                            next_vacant_idx: INVALID_INDEX,
                         };
                         idx += 1;
                     }
@@ -294,9 +294,9 @@ impl<T> SlabMap<T> {
                 }
             }
             self.entries[end - 1] = Entry::VacantTail {
-                idx_next_vacant: self.idx_next_vacant,
+                next_vacant_idx: self.next_vacant_idx,
             };
-            self.idx_next_vacant = start;
+            self.next_vacant_idx = start;
         }
     }
 
