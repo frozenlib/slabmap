@@ -4,6 +4,8 @@ use criterion::{
 };
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
+use slab::Slab;
+use slab_map::SlabMap;
 use std::collections::{BTreeMap, HashMap};
 
 criterion_main!(benches);
@@ -258,10 +260,10 @@ trait BenchFunc {
             Self::not_available::<BTreeMap<usize, usize>>(&mut g);
         }
         if !targets.slab {
-            Self::not_available::<slab::Slab<usize>>(&mut g);
+            Self::not_available::<Slab<usize>>(&mut g);
         }
         if !targets.slab_map {
-            Self::not_available::<slab_map::SlabMap<usize>>(&mut g);
+            Self::not_available::<SlabMap<usize>>(&mut g);
         }
         for &input in inputs {
             if targets.vec {
@@ -274,10 +276,10 @@ trait BenchFunc {
                 Self::bench_as::<BTreeMap<usize, usize>>(&mut g, input);
             }
             if targets.slab {
-                Self::bench_as::<slab::Slab<usize>>(&mut g, input);
+                Self::bench_as::<Slab<usize>>(&mut g, input);
             }
             if targets.slab_map {
-                Self::bench_as::<slab_map::SlabMap<usize>>(&mut g, input);
+                Self::bench_as::<SlabMap<usize>>(&mut g, input);
             }
             if targets.slab_iter_optimized {
                 Self::bench_as::<OptimizedSlab>(&mut g, input);
@@ -482,7 +484,7 @@ impl BenchTarget for BTreeMap<usize, usize> {
         self[&i]
     }
 }
-impl BenchTarget for slab_map::SlabMap<usize> {
+impl BenchTarget for SlabMap<usize> {
     const NAME: &'static str = "slab_map::Slab";
 
     #[inline]
@@ -516,7 +518,7 @@ impl BenchTarget for slab_map::SlabMap<usize> {
 }
 
 #[derive(Clone)]
-struct OptimizedSlab(slab_map::SlabMap<usize>);
+struct OptimizedSlab(SlabMap<usize>);
 
 impl BenchTarget for OptimizedSlab {
     const NAME: &'static str = "slab_map::Slab(optimized)";
@@ -555,7 +557,7 @@ impl BenchTarget for OptimizedSlab {
     }
 }
 
-impl BenchTarget for slab::Slab<usize> {
+impl BenchTarget for Slab<usize> {
     const NAME: &'static str = "slab::Slab";
 
     #[inline]
