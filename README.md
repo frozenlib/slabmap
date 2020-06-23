@@ -27,18 +27,26 @@ The following chart shows the difference in performance between `BTreeMap`, `Has
 
 ### Insert
 
-![insert performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/insert_large.svg?token=ACRPBIGGRPGVK7YZL7LZTVC67GB4K)
+![insert performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/insert_large.svg?token=ACRPBIFOTM4JI3Z6U2PCUQS67LXU2)
 
 ### Remove random elements
 
+![remove random elements performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/remove_random_large_fast_only.svg?token=ACRPBIHJK667KLBDLNIUODS67LXXC)
+
 ### Random access
 
+![random access performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/get_random.svg?token=ACRPBIBA7RXH5ZX47PVYSC267LXZO)
+
 ### Sequential access
+
+![sequential access performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/iter_key_values.svg?token=ACRPBIBN74IOFD54PBCSX3S67LYEG)
 
 ### Sequential access after remove many elements
 
 - x-axis : number of remaining elements
 - y-axis : duration (lower is better)
+
+![Sequential access after remove many elements performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/iter_key_values_removed.svg?token=ACRPBIGZ6MZMLD5E22MKH5267LYFA)
 
 ## Install
 
