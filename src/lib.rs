@@ -148,6 +148,12 @@ impl<T> SlabMap<T> {
         }
     }
 
+    /// Returns true if the SlabMap contains a value for the specified key.
+    #[inline]
+    pub fn contains_key(&self, key: usize) -> bool {
+        self.get(key).is_some()
+    }
+
     /// Inserts a value into the SlabMap.
     ///
     /// Returns the key associated with the value.
