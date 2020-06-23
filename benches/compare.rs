@@ -5,7 +5,7 @@ use criterion::{
 use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use slab::Slab;
-use slab_map::SlabMap;
+use slabmap::SlabMap;
 use std::collections::{BTreeMap, HashMap};
 
 criterion_main!(benches);
@@ -262,7 +262,7 @@ trait BenchFunc {
         if !targets.slab {
             Self::not_available::<Slab<usize>>(&mut g);
         }
-        if !targets.slab_map {
+        if !targets.slabmap {
             Self::not_available::<SlabMap<usize>>(&mut g);
         }
         for &input in inputs {
@@ -278,7 +278,7 @@ trait BenchFunc {
             if targets.slab {
                 Self::bench_as::<Slab<usize>>(&mut g, input);
             }
-            if targets.slab_map {
+            if targets.slabmap {
                 Self::bench_as::<SlabMap<usize>>(&mut g, input);
             }
             if targets.slab_iter_optimized {
@@ -294,7 +294,7 @@ struct BenchTargets {
     hash_map: bool,
     btree_map: bool,
     slab: bool,
-    slab_map: bool,
+    slabmap: bool,
     slab_iter_optimized: bool,
 }
 impl BenchTargets {
@@ -307,7 +307,7 @@ impl BenchTargets {
         hash_map: true,
         btree_map: true,
         slab: true,
-        slab_map: true,
+        slabmap: true,
         slab_iter_optimized: true,
     };
     fn no_vec(self) -> Self {
@@ -323,7 +323,7 @@ impl BenchTargets {
     fn no_slab(self) -> Self {
         Self {
             slab: false,
-            slab_map: false,
+            slabmap: false,
             ..self
         }
     }

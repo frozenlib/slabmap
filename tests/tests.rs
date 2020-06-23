@@ -1,5 +1,5 @@
 use proptest::prelude::*;
-use slab_map::*;
+use slabmap::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 

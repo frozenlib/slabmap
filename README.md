@@ -1,8 +1,8 @@
-# slab-map
+# slabmap
 
-[![Crates.io](https://img.shields.io/crates/v/slab-map.svg)](https://crates.io/crates/slab-map)
-[![Docs.rs](https://docs.rs/slab-map/badge.svg)](https://docs.rs/crate/slab-map)
-[![Actions Status](https://github.com/frozenlib/slab-map/workflows/build/badge.svg)](https://github.com/frozenlib/slab-map/actions)
+[![Crates.io](https://img.shields.io/crates/v/slabmap.svg)](https://crates.io/crates/slabmap)
+[![Docs.rs](https://docs.rs/slabmap/badge.svg)](https://docs.rs/crate/slabmap)
+[![Actions Status](https://github.com/frozenlib/slabmap/workflows/build/badge.svg)](https://github.com/frozenlib/slabmap/actions)
 
 This crate provides the type `SlabMap`.
 `SlabMap` is HashMap-like collection that automatically determines the key.
@@ -13,13 +13,13 @@ Add this to your Cargo.toml:
 
 ```toml
 [dependencies]
-slab-map = "0.1"
+slabmap = "0.1"
 ```
 
 ## Examples
 
 ```rust
-use slab_map::SlabMap;
+use slabmap::SlabMap;
 
 let mut s = SlabMap::new();
 let key_a = s.insert("aaa");
@@ -62,26 +62,26 @@ The following chart shows the difference in performance between
 
 ### Insert
 
-![insert performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/insert_large.svg?token=ACRPBIFOTM4JI3Z6U2PCUQS67LXU2)
+![insert performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/insert_large.svg?token=ACRPBIFOTM4JI3Z6U2PCUQS67LXU2)
 
 ### Remove random elements
 
-![remove random elements performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/remove_random_large_fast_only.svg?token=ACRPBIHJK667KLBDLNIUODS67LXXC)
+![remove random elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/remove_random_large_fast_only.svg?token=ACRPBIHJK667KLBDLNIUODS67LXXC)
 
 ### Random access
 
-![random access performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/get_random.svg?token=ACRPBIBA7RXH5ZX47PVYSC267LXZO)
+![random access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/get_random.svg?token=ACRPBIBA7RXH5ZX47PVYSC267LXZO)
 
 ### Sequential access
 
-![sequential access performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/iter_key_values.svg?token=ACRPBIBN74IOFD54PBCSX3S67LYEG)
+![sequential access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values.svg?token=ACRPBIBN74IOFD54PBCSX3S67LYEG)
 
 ### Sequential access after removing elements from a 10,000-element collection
 
 - x-axis : number of remaining elements
 - y-axis : duration (lower is better)
 
-![Sequential access after remove many elements performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/iter_key_values_removed.svg?token=ACRPBIGZ6MZMLD5E22MKH5267LYFA)
+![Sequential access after remove many elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values_removed.svg?token=ACRPBIGZ6MZMLD5E22MKH5267LYFA)
 
 Removes an element from a collection of 10000 elements and the number of elements left is the value of the x-axis
 

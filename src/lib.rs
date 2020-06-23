@@ -4,7 +4,7 @@
 # Examples
 
 ```
-use slab_map::SlabMap;
+use slabmap::SlabMap;
 
 let mut s = SlabMap::new();
 let key_a = s.insert("aaa");
@@ -101,7 +101,7 @@ impl<T> SlabMap<T> {
     ///
     /// # Examples
     /// ```
-    /// use slab_map::SlabMap;
+    /// use slabmap::SlabMap;
     ///
     /// let mut s = SlabMap::new();
     /// assert_eq!(s.len(), 0);
@@ -231,7 +231,7 @@ impl<T> SlabMap<T> {
     /// Retains only the elements specified by the predicate and optimize free spaces.
     ///
     /// ```
-    /// use slab_map::SlabMap;
+    /// use slabmap::SlabMap;
     ///
     /// let mut s = SlabMap::new();
     /// s.insert(10);

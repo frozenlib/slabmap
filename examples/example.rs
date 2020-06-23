@@ -5,7 +5,7 @@ fn main() {
 }
 
 fn example_main() {
-    use slab_map::SlabMap;
+    use slabmap::SlabMap;
 
     let mut s = SlabMap::new();
     let key_a = s.insert("aaa");
@@ -24,7 +24,7 @@ fn example_main() {
 }
 
 fn example_retain() {
-    use slab_map::SlabMap;
+    use slabmap::SlabMap;
 
     let mut s = SlabMap::new();
     s.insert(10);
@@ -39,7 +39,7 @@ fn example_retain() {
 }
 
 fn example_len() {
-    use slab_map::SlabMap;
+    use slabmap::SlabMap;
 
     let mut s = SlabMap::new();
     assert_eq!(s.len(), 0);

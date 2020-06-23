@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, Bencher, Criterion};
 use rand::prelude::*;
-use slab_map::SlabMap;
+use slabmap::SlabMap;
 
 criterion_main!(benches);
 criterion_group!(benches, criterion_benchmark);
