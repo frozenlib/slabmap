@@ -62,26 +62,26 @@ The following chart shows the difference in performance between
 
 ### Insert
 
-![insert performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/insert_large.svg?token=ACRPBIFOTM4JI3Z6U2PCUQS67LXU2)
+![insert performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/insert_large.svg?token=ACRPBICBTSIPIQNXU7QKMG267MEQK)
 
 ### Remove random elements
 
-![remove random elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/remove_random_large_fast_only.svg?token=ACRPBIHJK667KLBDLNIUODS67LXXC)
+![remove random elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/remove_random_large_fast_only.svg?token=ACRPBIC62MWXTOVROVI4VVC67MERM)
 
 ### Random access
 
-![random access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/get_random.svg?token=ACRPBIBA7RXH5ZX47PVYSC267LXZO)
+![random access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/get_random.svg?token=ACRPBIBAHCKOCZ4VUWPMQ3S67MESK)
 
 ### Sequential access
 
-![sequential access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values.svg?token=ACRPBIBN74IOFD54PBCSX3S67LYEG)
+![sequential access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values.svg?token=ACRPBIGF2NHYAPVIAN35HKC67METS)
 
 ### Sequential access after removing elements from a 10,000-element collection
 
 - x-axis : number of remaining elements
 - y-axis : duration (lower is better)
 
-![Sequential access after remove many elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values_removed.svg?token=ACRPBIGZ6MZMLD5E22MKH5267LYFA)
+![Sequential access after remove many elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values_removed.svg?token=ACRPBIAVZHDNT3CWUP6WAEC67MEUW)
 
 Removes an element from a collection of 10000 elements and the number of elements left is the value of the x-axis
 
