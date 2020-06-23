@@ -1,10 +1,10 @@
 use proptest::prelude::*;
-use slab_iter::*;
+use slab_map::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
 struct Tester<T> {
-    slab: Slab<T>,
+    slab: SlabMap<T>,
     m: HashMap<usize, T>,
     log: bool,
 }
@@ -12,7 +12,7 @@ struct Tester<T> {
 impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
     pub fn new(log: bool) -> Self {
         Self {
-            slab: Slab::new(),
+            slab: SlabMap::new(),
             m: HashMap::new(),
             log,
         }
@@ -163,7 +163,7 @@ fn test_xx() {
 
 #[test]
 fn debug() {
-    let mut s = Slab::new();
+    let mut s = SlabMap::new();
     s.insert(5);
     s.insert(10);
 

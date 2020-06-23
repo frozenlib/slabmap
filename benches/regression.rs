@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, Bencher, Criterion};
 use rand::prelude::*;
-use slab_iter::Slab;
+use slab_map::SlabMap;
 
 criterion_main!(benches);
 criterion_group!(benches, criterion_benchmark);
@@ -17,7 +17,7 @@ const COUNT: usize = 10000;
 
 fn insert(b: &mut Bencher) {
     b.iter(|| {
-        let mut s = Slab::new();
+        let mut s = SlabMap::new();
         for i in 0..COUNT {
             s.insert(i);
         }
@@ -25,7 +25,7 @@ fn insert(b: &mut Bencher) {
     });
 }
 fn remove(b: &mut Bencher) {
-    let mut s = Slab::new();
+    let mut s = SlabMap::new();
     for i in 0..COUNT {
         s.insert(i);
     }
@@ -39,7 +39,7 @@ fn remove(b: &mut Bencher) {
     });
 }
 fn values(b: &mut Bencher) {
-    let mut s = Slab::new();
+    let mut s = SlabMap::new();
     for i in 0..COUNT {
         s.insert(i);
     }
@@ -49,7 +49,7 @@ fn values(b: &mut Bencher) {
     });
 }
 fn optimize(b: &mut Bencher) {
-    let mut s = Slab::new();
+    let mut s = SlabMap::new();
     for i in 0..COUNT {
         s.insert(i);
     }

@@ -1,10 +1,10 @@
 [package]
-name = "slab-iter"
+name = "slab-map"
 version = "0.1.0"
 authors = ["frozenlib"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/frozenlib/slab-iter"
-documentation = "https://docs.rs/slab-iter/"
+repository = "https://github.com/frozenlib/slab-map"
+documentation = "https://docs.rs/slab-map/"
 keywords = ["slab", "allocator", "map", "vec"]
 categories = ["data-structures", "memory-management"]
 description = "HashMap-like collection that automatically determines the key."

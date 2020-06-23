@@ -260,8 +260,8 @@ trait BenchFunc {
         if !targets.slab {
             Self::not_available::<slab::Slab<usize>>(&mut g);
         }
-        if !targets.slab_iter {
-            Self::not_available::<slab_iter::Slab<usize>>(&mut g);
+        if !targets.slab_map {
+            Self::not_available::<slab_map::SlabMap<usize>>(&mut g);
         }
         for &input in inputs {
             if targets.vec {
@@ -276,8 +276,8 @@ trait BenchFunc {
             if targets.slab {
                 Self::bench_as::<slab::Slab<usize>>(&mut g, input);
             }
-            if targets.slab_iter {
-                Self::bench_as::<slab_iter::Slab<usize>>(&mut g, input);
+            if targets.slab_map {
+                Self::bench_as::<slab_map::SlabMap<usize>>(&mut g, input);
             }
             if targets.slab_iter_optimized {
                 Self::bench_as::<OptimizedSlab>(&mut g, input);
@@ -292,7 +292,7 @@ struct BenchTargets {
     hash_map: bool,
     btree_map: bool,
     slab: bool,
-    slab_iter: bool,
+    slab_map: bool,
     slab_iter_optimized: bool,
 }
 impl BenchTargets {
@@ -305,7 +305,7 @@ impl BenchTargets {
         hash_map: true,
         btree_map: true,
         slab: true,
-        slab_iter: true,
+        slab_map: true,
         slab_iter_optimized: true,
     };
     fn no_vec(self) -> Self {
@@ -321,7 +321,7 @@ impl BenchTargets {
     fn no_slab(self) -> Self {
         Self {
             slab: false,
-            slab_iter: false,
+            slab_map: false,
             ..self
         }
     }
@@ -482,12 +482,12 @@ impl BenchTarget for BTreeMap<usize, usize> {
         self[&i]
     }
 }
-impl BenchTarget for slab_iter::Slab<usize> {
-    const NAME: &'static str = "slab_iter::Slab";
+impl BenchTarget for slab_map::SlabMap<usize> {
+    const NAME: &'static str = "slab_map::Slab";
 
     #[inline]
     fn new() -> Self {
-        slab_iter::Slab::new()
+        slab_map::SlabMap::new()
     }
     #[inline]
     fn insert(&mut self, n: usize) {
@@ -516,14 +516,14 @@ impl BenchTarget for slab_iter::Slab<usize> {
 }
 
 #[derive(Clone)]
-struct OptimizedSlab(slab_iter::Slab<usize>);
+struct OptimizedSlab(slab_map::SlabMap<usize>);
 
 impl BenchTarget for OptimizedSlab {
-    const NAME: &'static str = "slab_iter::Slab(optimized)";
+    const NAME: &'static str = "slab_map::Slab(optimized)";
 
     #[inline]
     fn new() -> Self {
-        OptimizedSlab(slab_iter::Slab::new())
+        OptimizedSlab(slab_map::SlabMap::new())
     }
     #[inline]
     fn insert(&mut self, n: usize) {
@@ -560,7 +560,7 @@ impl BenchTarget for slab::Slab<usize> {
 
     #[inline]
     fn new() -> Self {
-        slab::Slab::new()
+        slab::SlabMap::new()
     }
     #[inline]
     fn insert(&mut self, n: usize) {

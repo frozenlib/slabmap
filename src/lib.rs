@@ -4,9 +4,9 @@
 # Examples
 
 ```
-use slab_iter::Slab;
+use slab_map::SlabMap;
 
-let mut s = Slab::new();
+let mut s = SlabMap::new();
 let key_a = s.insert("aaa");
 let key_b = s.insert("bbb");
 
@@ -28,7 +28,7 @@ use std::{fmt::Debug, iter::FusedIterator, mem::replace};
 A fast HashMap-like collection that automatically determines the key.
 */
 #[derive(Clone)]
-pub struct Slab<T> {
+pub struct SlabMap<T> {
     entries: Vec<Entry<T>>,
     idx_next_vacant: usize,
     len: usize,
@@ -43,7 +43,7 @@ enum Entry<T> {
     VacantTail { idx_next_vacant: usize },
 }
 
-impl<T> Slab<T> {
+impl<T> SlabMap<T> {
     /// Constructs a new, empty Slab<T>.
     /// The slab will not allocate until elements are pushed onto it.
     #[inline]
@@ -101,9 +101,9 @@ impl<T> Slab<T> {
     ///
     /// # Examples
     /// ```
-    /// use slab_iter::Slab;
+    /// use slab_map::SlabMap;
     ///
-    /// let mut s = Slab::new();
+    /// let mut s = SlabMap::new();
     /// assert_eq!(s.len(), 0);
     ///
     /// let key1 = s.insert(10);
@@ -231,9 +231,9 @@ impl<T> Slab<T> {
     /// Retains only the elements specified by the predicate and optimize free spaces.
     ///
     /// ```
-    /// use slab_iter::Slab;
+    /// use slab_map::SlabMap;
     ///
-    /// let mut s = Slab::new();
+    /// let mut s = SlabMap::new();
     /// s.insert(10);
     /// s.insert(15);
     /// s.insert(20);
@@ -346,18 +346,18 @@ impl<T> Slab<T> {
         ValuesMut(self.iter_mut())
     }
 }
-impl<T> Default for Slab<T> {
+impl<T> Default for SlabMap<T> {
     fn default() -> Self {
         Self::new()
     }
 }
-impl<T: Debug> Debug for Slab<T> {
+impl<T: Debug> Debug for SlabMap<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_map().entries(self.iter()).finish()
     }
 }
 
-impl<T> std::ops::Index<usize> for Slab<T> {
+impl<T> std::ops::Index<usize> for SlabMap<T> {
     type Output = T;
 
     #[inline]
@@ -365,14 +365,14 @@ impl<T> std::ops::Index<usize> for Slab<T> {
         self.get(index).expect("out of index.")
     }
 }
-impl<T> std::ops::IndexMut<usize> for Slab<T> {
+impl<T> std::ops::IndexMut<usize> for SlabMap<T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.get_mut(index).expect("out of index.")
     }
 }
 
-impl<T> IntoIterator for Slab<T> {
+impl<T> IntoIterator for SlabMap<T> {
     type Item = T;
     type IntoIter = IntoIter<T>;
     fn into_iter(self) -> Self::IntoIter {
@@ -383,7 +383,7 @@ impl<T> IntoIterator for Slab<T> {
     }
 }
 
-impl<'a, T> IntoIterator for &'a Slab<T> {
+impl<'a, T> IntoIterator for &'a SlabMap<T> {
     type Item = (usize, &'a T);
     type IntoIter = Iter<'a, T>;
 
@@ -392,7 +392,7 @@ impl<'a, T> IntoIterator for &'a Slab<T> {
         self.iter()
     }
 }
-impl<'a, T> IntoIterator for &'a mut Slab<T> {
+impl<'a, T> IntoIterator for &'a mut SlabMap<T> {
     type Item = (usize, &'a mut T);
     type IntoIter = IterMut<'a, T>;
 

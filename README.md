@@ -1,8 +1,8 @@
-# slab-iter
+# slab-map
 
-[![Crates.io](https://img.shields.io/crates/v/slab-iter.svg)](https://crates.io/crates/slab-iter)
-[![Docs.rs](https://docs.rs/slab-iter/badge.svg)](https://docs.rs/crate/slab-iter)
-[![Actions Status](https://github.com/frozenlib/slab-iter/workflows/build/badge.svg)](https://github.com/frozenlib/slab-iter/actions)
+[![Crates.io](https://img.shields.io/crates/v/slab-map.svg)](https://crates.io/crates/slab-map)
+[![Docs.rs](https://docs.rs/slab-map/badge.svg)](https://docs.rs/crate/slab-map)
+[![Actions Status](https://github.com/frozenlib/slab-map/workflows/build/badge.svg)](https://github.com/frozenlib/slab-map/actions)
 
 This crate provides the type `Slab`.
 `Slab` is HashMap-like collection that automatically determines the key.
@@ -17,17 +17,17 @@ This crate provides the type `Slab`.
 
 - [`slab`](https://crates.io/crates/slab), Carl Lerche's slab crate provides a slab implementation with a similar API.
 
-  For both `slab` and `slab-iter`, after adding many elements to the collection, removing many element will reduce iterate performance.
+  For both `slab` and `slab-map`, after adding many elements to the collection, removing many element will reduce iterate performance.
 
-  However, unlike `slab`, `slab-iter` can improve iterate performance by calling `slab_iter::Slab::optimize`.
+  However, unlike `slab`, `slab-map` can improve iterate performance by calling `slab_map::Slab::optimize`.
 
 ## Performance
 
-The following chart shows the difference in performance between `BTreeMap`, `HashMap`, `Vec`, `slab::Slab` and `slab_iter::Slab`.
+The following chart shows the difference in performance between `BTreeMap`, `HashMap`, `Vec`, `slab::Slab` and `slab_map::Slab`.
 
 ### Insert
 
-![insert performance](https://raw.githubusercontent.com/frozenlib/slab-iter/images/bench/insert_large.svg?token=ACRPBIGGRPGVK7YZL7LZTVC67GB4K)
+![insert performance](https://raw.githubusercontent.com/frozenlib/slab-map/images/bench/insert_large.svg?token=ACRPBIGGRPGVK7YZL7LZTVC67GB4K)
 
 ### Remove random elements
 
@@ -46,15 +46,15 @@ Add this to your Cargo.toml:
 
 ```toml
 [dependencies]
-slab-iter = "0.1"
+slab-map = "0.1"
 ```
 
 ## Examples
 
 ```rust
-use slab_iter::Slab;
+use slab_map::SlabMap;
 
-let mut s = Slab::new();
+let mut s = SlabMap::new();
 let key_a = s.insert("aaa");
 let key_b = s.insert("bbb");
 
