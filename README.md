@@ -4,26 +4,26 @@
 [![Docs.rs](https://docs.rs/slab-map/badge.svg)](https://docs.rs/crate/slab-map)
 [![Actions Status](https://github.com/frozenlib/slab-map/workflows/build/badge.svg)](https://github.com/frozenlib/slab-map/actions)
 
-This crate provides the type `Slab`.
-`Slab` is HashMap-like collection that automatically determines the key.
+This crate provides the type `SlabMap`.
+`SlabMap` is HashMap-like collection that automatically determines the key.
 
-## The difference between `Slab` and `HashMap`
+## The difference between `SlabMap` and `HashMap`
 
-- `Slab` can only use usize as a key.
-- The key of `Slab` is determined automatically.
-- `Slab` runs faster than `HashMap`.
+- `SlabMap` can only use usize as a key.
+- The key of `SlabMap` is determined automatically.
+- `SlabMap` runs faster than `HashMap`.
 
 ## Comparison with Similar Crates
 
-- [`slab`](https://crates.io/crates/slab), Carl Lerche's slab crate provides a slab implementation with a similar API.
+- [`Slab`](https://crates.io/crates/slab), Carl Lerche's slab crate provides a slab implementation with a similar API.
 
   For both `slab` and `slab-map`, after adding many elements to the collection, removing many element will reduce iterate performance.
 
-  However, unlike `slab`, `slab-map` can improve iterate performance by calling `slab_map::Slab::optimize`.
+  However, unlike `slab`, `slab-map` can improve iterate performance by calling `slab_map::SlabMap::optimize`.
 
 ## Performance
 
-The following chart shows the difference in performance between `BTreeMap`, `HashMap`, `Vec`, `slab::Slab` and `slab_map::Slab`.
+The following chart shows the difference in performance between `BTreeMap`, `HashMap`, `Vec`, `Slab` and `SlabMap`.
 
 ### Insert
 

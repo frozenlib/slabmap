@@ -1,5 +1,5 @@
-/*! This crate provides the type [`Slab`].
-[`Slab`] is HashMap-like collection that automatically determines the key.
+/*! This crate provides the type [`SlabMap`].
+[`SlabMap`] is HashMap-like collection that automatically determines the key.
 
 # Examples
 
@@ -44,8 +44,8 @@ enum Entry<T> {
 }
 
 impl<T> SlabMap<T> {
-    /// Constructs a new, empty Slab<T>.
-    /// The slab will not allocate until elements are pushed onto it.
+    /// Constructs a new, empty SlabMap<T>.
+    /// The SlabMap will not allocate until elements are pushed onto it.
     #[inline]
     pub fn new() -> Self {
         Self {
@@ -56,7 +56,7 @@ impl<T> SlabMap<T> {
         }
     }
 
-    /// Constructs a new, empty Slab<T> with the specified capacity.
+    /// Constructs a new, empty SlabMap<T> with the specified capacity.
     #[inline]
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
@@ -67,13 +67,13 @@ impl<T> SlabMap<T> {
         }
     }
 
-    /// Returns the number of elements the slab can hold without reallocating.
+    /// Returns the number of elements the SlabMap can hold without reallocating.
     #[inline]
     pub fn capacity(&self) -> usize {
         self.entries.capacity()
     }
 
-    /// Reserves capacity for at least additional more elements to be inserted in the given Slab<T>.
+    /// Reserves capacity for at least additional more elements to be inserted in the given SlabMap<T>.
     ///
     /// # Panics
     /// Panics if the new capacity overflows usize.    
@@ -82,7 +82,7 @@ impl<T> SlabMap<T> {
         self.entries.reserve(self.entries_additional(additional));
     }
 
-    /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given Slab<T>.
+    /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given SlabMap<T>.
     ///
     /// # Panics
     /// Panics if the new capacity overflows usize.    
@@ -97,7 +97,7 @@ impl<T> SlabMap<T> {
         additional.saturating_sub(self.entries.len() - self.len)
     }
 
-    /// Returns the number of elements in the slab.
+    /// Returns the number of elements in the SlabMap.
     ///
     /// # Examples
     /// ```
@@ -122,7 +122,7 @@ impl<T> SlabMap<T> {
         self.len
     }
 
-    /// Returns true if the slab contains no elements.
+    /// Returns true if the SlabMap contains no elements.
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len == 0
@@ -148,7 +148,7 @@ impl<T> SlabMap<T> {
         }
     }
 
-    /// Inserts a value into the slab.
+    /// Inserts a value into the SlabMap.
     ///
     /// Returns the key associated with the value.
     pub fn insert(&mut self, value: T) -> usize {
@@ -177,7 +177,7 @@ impl<T> SlabMap<T> {
         idx
     }
 
-    /// Removes a key from the slab, returning the value at the key if the key was previously in the slab.
+    /// Removes a key from the SlabMap, returning the value at the key if the key was previously in the SlabMap.
     pub fn remove(&mut self, key: usize) -> Option<T> {
         let is_last = key + 1 == self.entries.len();
         let e = self.entries.get_mut(key)?;
@@ -208,7 +208,7 @@ impl<T> SlabMap<T> {
         }
     }
 
-    /// Clears the slab, removing all values and optimize free spaces.
+    /// Clears the SlabMap, removing all values and optimize free spaces.
     pub fn clear(&mut self) {
         self.entries.clear();
         self.len = 0;
@@ -216,7 +216,7 @@ impl<T> SlabMap<T> {
         self.non_optimized = 0;
     }
 
-    /// Clears the Slab, returning all values as an iterator and optimize free spaces.
+    /// Clears the SlabMap, returning all values as an iterator and optimize free spaces.
     pub fn drain(&mut self) -> Drain<T> {
         let len = self.len;
         self.len = 0;
@@ -300,9 +300,9 @@ impl<T> SlabMap<T> {
         }
     }
 
-    /// Gets an iterator over the entries of the slab, sorted by key.
+    /// Gets an iterator over the entries of the SlabMap, sorted by key.
     ///
-    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
+    /// If you make a large number of [`remove`](SlabMap::remove) calls, [`optimize`](SlabMap::optimize) should be called before calling this function.
     #[inline]
     pub fn iter(&self) -> Iter<T> {
         Iter {
@@ -313,7 +313,7 @@ impl<T> SlabMap<T> {
 
     /// Gets a mutable iterator over the entries of the slab, sorted by key.
     ///
-    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
+    /// If you make a large number of [`remove`](SlabMap::remove) calls, [`optimize`](SlabMap::optimize) should be called before calling this function.
     #[inline]
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut {
@@ -322,25 +322,25 @@ impl<T> SlabMap<T> {
         }
     }
 
-    /// Gets an iterator over the keys of the slab, in sorted order.
+    /// Gets an iterator over the keys of the SlabMap, in sorted order.
     ///
-    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
+    /// If you make a large number of [`remove`](SlabMap::remove) calls, [`optimize`](SlabMap::optimize) should be called before calling this function.
     #[inline]
     pub fn keys(&self) -> Keys<T> {
         Keys(self.iter())
     }
 
-    /// Gets an iterator over the values of the slab.
+    /// Gets an iterator over the values of the SlabMap.
     ///
-    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
+    /// If you make a large number of [`remove`](SlabMap::remove) calls, [`optimize`](SlabMap::optimize) should be called before calling this function.
     #[inline]
     pub fn values(&self) -> Values<T> {
         Values(self.iter())
     }
 
-    /// Gets a mutable iterator over the values of the slab.
+    /// Gets a mutable iterator over the values of the SlabMap.
     ///
-    /// If you make a large number of [`remove`](Slab::remove) calls, [`optimize`](Slab::optimize) should be called before calling this function.
+    /// If you make a large number of [`remove`](SlabMap::remove) calls, [`optimize`](SlabMap::optimize) should be called before calling this function.
     #[inline]
     pub fn values_mut(&mut self) -> ValuesMut<T> {
         ValuesMut(self.iter_mut())
@@ -402,9 +402,9 @@ impl<'a, T> IntoIterator for &'a mut SlabMap<T> {
     }
 }
 
-/// An owning iterator over the values of a Slab.
+/// An owning iterator over the values of a SlabMap.
 ///
-/// This struct is created by the `into_iter` method on [`Slab`] (provided by the IntoIterator trait).
+/// This struct is created by the `into_iter` method on [`SlabMap`] (provided by the IntoIterator trait).
 pub struct IntoIter<T> {
     iter: std::vec::IntoIter<Entry<T>>,
     len: usize,
@@ -438,9 +438,9 @@ impl<T> Iterator for IntoIter<T> {
     }
 }
 
-/// A draining iterator for Slab<T>.
+/// A draining iterator for SlabMap<T>.
 ///
-/// This struct is created by the [`drain`](Slab::drain) method on [`Slab`].
+/// This struct is created by the [`drain`](SlabMap::drain) method on [`SlabMap`].
 pub struct Drain<'a, T> {
     iter: std::vec::Drain<'a, Entry<T>>,
     len: usize,
@@ -474,9 +474,9 @@ impl<'a, T> Iterator for Drain<'a, T> {
     }
 }
 
-/// An iterator over the entries of a Slab.
+/// An iterator over the entries of a SlabMap.
 ///
-/// This struct is created by the [`iter`](Slab::iter) method on [`Slab`].
+/// This struct is created by the [`iter`](SlabMap::iter) method on [`SlabMap`].
 pub struct Iter<'a, T> {
     iter: std::iter::Enumerate<std::slice::Iter<'a, Entry<T>>>,
     len: usize,
@@ -512,9 +512,9 @@ impl<'a, T> Iterator for Iter<'a, T> {
 impl<'a, T> FusedIterator for Iter<'a, T> {}
 impl<'a, T> ExactSizeIterator for Iter<'a, T> {}
 
-/// A mutable iterator over the entries of a Slab.
+/// A mutable iterator over the entries of a SlabMap.
 ///
-/// This struct is created by the [`iter_mut`](Slab::iter_mut) method on [`Slab`].
+/// This struct is created by the [`iter_mut`](SlabMap::iter_mut) method on [`SlabMap`].
 pub struct IterMut<'a, T> {
     iter: std::iter::Enumerate<std::slice::IterMut<'a, Entry<T>>>,
     len: usize,
@@ -550,9 +550,9 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 impl<'a, T> FusedIterator for IterMut<'a, T> {}
 impl<'a, T> ExactSizeIterator for IterMut<'a, T> {}
 
-/// An iterator over the keys of a Slab.
+/// An iterator over the keys of a SlabMap.
 ///
-/// This struct is created by the [`keys`](Slab::keys) method on [`Slab`].
+/// This struct is created by the [`keys`](SlabMap::keys) method on [`SlabMap`].
 pub struct Keys<'a, T>(Iter<'a, T>);
 impl<'a, T> Iterator for Keys<'a, T> {
     type Item = usize;
@@ -574,9 +574,9 @@ impl<'a, T> Iterator for Keys<'a, T> {
 impl<'a, T> FusedIterator for Keys<'a, T> {}
 impl<'a, T> ExactSizeIterator for Keys<'a, T> {}
 
-/// An iterator over the values of a Slab.
+/// An iterator over the values of a SlabMap.
 ///
-/// This struct is created by the [`values`](Slab::values) method on [`Slab`].
+/// This struct is created by the [`values`](SlabMap::values) method on [`SlabMap`].
 pub struct Values<'a, T>(Iter<'a, T>);
 impl<'a, T> Iterator for Values<'a, T> {
     type Item = &'a T;
@@ -598,9 +598,9 @@ impl<'a, T> Iterator for Values<'a, T> {
 impl<'a, T> FusedIterator for Values<'a, T> {}
 impl<'a, T> ExactSizeIterator for Values<'a, T> {}
 
-/// A mutable iterator over the values of a Slab.
+/// A mutable iterator over the values of a SlabMap.
 ///
-/// This struct is created by the [`values_mut`](Slab::values_mut) method on [`Slab`].
+/// This struct is created by the [`values_mut`](SlabMap::values_mut) method on [`SlabMap`].
 pub struct ValuesMut<'a, T>(IterMut<'a, T>);
 impl<'a, T> Iterator for ValuesMut<'a, T> {
     type Item = &'a mut T;
