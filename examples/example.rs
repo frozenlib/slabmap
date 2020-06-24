@@ -2,6 +2,7 @@ fn main() {
     example_main();
     example_retain();
     example_len();
+    example_insert();
     example_insert_with_key();
 }
 
@@ -55,6 +56,17 @@ fn example_len() {
 
     s.remove(key2);
     assert_eq!(s.len(), 2);
+}
+
+fn example_insert() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    let key_abc = s.insert("abc");
+    let key_xyz = s.insert("xyz");
+
+    assert_eq!(s[key_abc], "abc");
+    assert_eq!(s[key_xyz], "xyz");
 }
 
 fn example_insert_with_key() {
