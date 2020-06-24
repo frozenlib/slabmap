@@ -3,6 +3,7 @@ name = "slabmap"
 version = "0.1.0"
 authors = ["frozenlib"]
 license = "MIT OR Apache-2.0"
+readme = "README.md"
 repository = "https://github.com/frozenlib/slabmap"
 documentation = "https://docs.rs/slabmap/"
 keywords = ["slab", "allocator", "map", "vec"]
