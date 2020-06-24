@@ -164,6 +164,16 @@ impl<T> SlabMap<T> {
     /// Inserts a value given by `f` into the SlabMap. The key to be associated with the value is passed to `f`.
     ///
     /// Returns the key associated with the value.
+    ///
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    ///
+    /// let mut s = SlabMap::new();
+    /// let key = s.insert_with_key(|key| format!("my key is {}", key));
+    ///
+    /// assert_eq!(s[key], format!("my key is {}", key));
+    /// ```
     #[inline]
     pub fn insert_with_key(&mut self, f: impl FnOnce(usize) -> T) -> usize {
         let idx;

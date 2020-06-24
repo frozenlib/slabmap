@@ -2,6 +2,7 @@ fn main() {
     example_main();
     example_retain();
     example_len();
+    example_insert_with_key();
 }
 
 fn example_main() {
@@ -54,4 +55,13 @@ fn example_len() {
 
     s.remove(key2);
     assert_eq!(s.len(), 2);
+}
+
+fn example_insert_with_key() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    let key = s.insert_with_key(|key| format!("my key is {}", key));
+
+    assert_eq!(s[key], format!("my key is {}", key));
 }
