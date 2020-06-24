@@ -56,9 +56,9 @@ However, unlike `Slab`, `SlabMap` can improve iterate performance by calling `op
 The following chart shows the difference in performance between
 [`BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html),
 [`HashMap`](https://doc.rust-lang.org/std/collections/struct.HashMap.html),
+[`Slab`](https://docs.rs/slab/0.4.2/slab/struct.Slab.html)(version 0.4.2),
+`SlabMap`(version 0.1.0) and,
 [`Vec`](https://doc.rust-lang.org/std/vec/struct.Vec.html),
-[`Slab`](https://docs.rs/slab/0.4.2/slab/struct.Slab.html) and
-`SlabMap`.
 
 ### Insert
 
