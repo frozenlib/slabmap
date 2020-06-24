@@ -158,6 +158,14 @@ impl<T> SlabMap<T> {
     ///
     /// Returns the key associated with the value.
     pub fn insert(&mut self, value: T) -> usize {
+        self.insert_with_key(|_| value)
+    }
+
+    /// Inserts a value given by `f` into the SlabMap. The key to be associated with the value is passed to `f`.
+    ///
+    /// Returns the key associated with the value.
+    #[inline]
+    pub fn insert_with_key(&mut self, f: impl FnOnce(usize) -> T) -> usize {
         let idx;
         if self.next_vacant_idx < self.entries.len() {
             idx = self.next_vacant_idx;
@@ -173,11 +181,11 @@ impl<T> SlabMap<T> {
                 Entry::VacantTail { next_vacant_idx } => next_vacant_idx,
                 Entry::Occupied(_) => unreachable!(),
             };
-            self.entries[idx] = Entry::Occupied(value);
+            self.entries[idx] = Entry::Occupied(f(idx));
             self.non_optimized = self.non_optimized.saturating_sub(1);
         } else {
             idx = self.entries.len();
-            self.entries.push(Entry::Occupied(value));
+            self.entries.push(Entry::Occupied(f(idx)));
         }
         self.len += 1;
         idx
