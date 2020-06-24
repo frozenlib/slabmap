@@ -79,11 +79,9 @@ The following chart shows the difference in performance between
 ### Sequential access after removing elements from a 10,000-element collection
 
 - x-axis : number of remaining elements
-- y-axis : duration (lower is better)
+- y-axis : average time (lower is better)
 
 ![Sequential access after remove many elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values_removed.svg?token=ACRPBIAVZHDNT3CWUP6WAEC67MEUW)
-
-Removes an element from a collection of 10000 elements and the number of elements left is the value of the x-axis
 
 ## License
 
