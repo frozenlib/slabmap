@@ -1,7 +1,7 @@
 # slabmap
 
 [![Crates.io](https://img.shields.io/crates/v/slabmap.svg)](https://crates.io/crates/slabmap)
-[![Docs.rs](https://docs.rs/slabmap/badge.svg)](https://docs.rs/crate/slabmap)
+[![Docs.rs](https://docs.rs/slabmap/badge.svg)](https://docs.rs/slabmap/)
 [![Actions Status](https://github.com/frozenlib/slabmap/workflows/Rust/badge.svg)](https://github.com/frozenlib/slabmap/actions)
 
 This crate provides the type `SlabMap`.
