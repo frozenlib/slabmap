@@ -13,13 +13,12 @@ let key_b = s.insert("bbb");
 assert_eq!(s[key_a], "aaa");
 assert_eq!(s[key_b], "bbb");
 
-s.optimize();
 for (key, value) in &s {
     println!("{} -> {}", key, value);
 }
 
-let value = s.remove(key_a);
-assert_eq!(value, Some("aaa"));
+assert_eq!(s.remove(key_a), Some("aaa"));
+assert_eq!(s.remove(key_a), None);
 ```
 */
 
@@ -123,12 +122,37 @@ impl<T> SlabMap<T> {
     }
 
     /// Returns true if the SlabMap contains no elements.
+    ///    
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    ///
+    /// let mut s = SlabMap::new();
+    /// assert_eq!(s.is_empty(), true);
+    ///
+    /// let key = s.insert("a");
+    /// assert_eq!(s.is_empty(), false);
+    ///
+    /// s.remove(key);
+    /// assert_eq!(s.is_empty(), true);
+    /// ```
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
 
     /// Returns a reference to the value corresponding to the key.
+    ///
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    ///
+    /// let mut s = SlabMap::new();
+    /// let key = s.insert(100);
+    ///
+    /// assert_eq!(s.get(key), Some(&100));
+    /// assert_eq!(s.get(key + 1), None);
+    /// ```
     #[inline]
     pub fn get(&self, key: usize) -> Option<&T> {
         if let Entry::Occupied(value) = self.entries.get(key)? {
@@ -149,6 +173,17 @@ impl<T> SlabMap<T> {
     }
 
     /// Returns true if the SlabMap contains a value for the specified key.
+    ///
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    ///
+    /// let mut s = SlabMap::new();
+    /// let key = s.insert(100);
+    ///
+    /// assert_eq!(s.contains_key(key), true);
+    /// assert_eq!(s.contains_key(key + 1), false);
+    /// ```
     #[inline]
     pub fn contains_key(&self, key: usize) -> bool {
         self.get(key).is_some()
@@ -214,6 +249,16 @@ impl<T> SlabMap<T> {
     }
 
     /// Removes a key from the SlabMap, returning the value at the key if the key was previously in the SlabMap.
+    ///
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    ///
+    /// let mut s = SlabMap::new();
+    /// let key = s.insert("a");
+    /// assert_eq!(s.remove(key), Some("a"));
+    /// assert_eq!(s.remove(key), None);
+    /// ```
     pub fn remove(&mut self, key: usize) -> Option<T> {
         let is_last = key + 1 == self.entries.len();
         let e = self.entries.get_mut(key)?;
@@ -245,6 +290,19 @@ impl<T> SlabMap<T> {
     }
 
     /// Clears the SlabMap, removing all values and optimize free spaces.
+    ///
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    ///
+    /// let mut s = SlabMap::new();
+    /// s.insert(1);
+    /// s.insert(2);
+    ///
+    /// s.clear();
+    ///
+    /// assert_eq!(s.is_empty(), true);
+    /// ```
     pub fn clear(&mut self) {
         self.entries.clear();
         self.len = 0;
@@ -253,6 +311,20 @@ impl<T> SlabMap<T> {
     }
 
     /// Clears the SlabMap, returning all values as an iterator and optimize free spaces.
+    ///
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    ///
+    /// let mut s = SlabMap::new();
+    /// s.insert(10);
+    /// s.insert(20);
+    ///
+    /// let d: Vec<_> = s.drain().collect();
+    ///
+    /// assert_eq!(s.is_empty(), true);
+    /// assert_eq!(d, vec![10, 20]);
+    /// ```
     pub fn drain(&mut self) -> Drain<T> {
         let len = self.len;
         self.len = 0;
@@ -266,6 +338,7 @@ impl<T> SlabMap<T> {
 
     /// Retains only the elements specified by the predicate and optimize free spaces.
     ///
+    /// # Examples
     /// ```
     /// use slabmap::SlabMap;
     ///
@@ -314,6 +387,29 @@ impl<T> SlabMap<T> {
     /// Optimizing the free space for speeding up iterations.
     ///
     /// If the free space has already been optimized, this method does nothing and completes with O(1).
+    ///
+    /// # Examples
+    /// ```
+    /// use slabmap::SlabMap;
+    /// use std::time::Instant;
+    ///
+    /// let mut s = SlabMap::new();
+    /// const COUNT: usize = 1000000;
+    /// for i in 0..COUNT {
+    ///     s.insert(i);
+    /// }
+    /// let keys: Vec<_> = s.keys().take(COUNT - 1).collect();
+    /// for key in keys {
+    ///     s.remove(key);
+    /// }
+    ///
+    /// s.optimize(); // if comment out this line, `s.values().sum()` to be slow.
+    ///
+    /// let begin = Instant::now();
+    /// let sum: usize = s.values().sum();
+    /// println!("sum : {}", sum);
+    /// println!("duration : {} ms", (Instant::now() - begin).as_millis());
+    /// ```
     pub fn optimize(&mut self) {
         if !self.is_optimized() {
             self.retain(|_, _| true);

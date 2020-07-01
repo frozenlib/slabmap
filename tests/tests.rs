@@ -1,171 +1,170 @@
-use proptest::prelude::*;
-use slabmap::*;
-use std::collections::HashMap;
-use std::fmt::Debug;
+#[test]
+fn test_new() {
+    use slabmap::SlabMap;
 
-struct Tester<T> {
-    slab: SlabMap<T>,
-    m: HashMap<usize, T>,
-    log: bool,
+    let s = SlabMap::<u32>::new();
+    assert_eq!(s.len(), 0);
 }
 
-impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
-    pub fn new(log: bool) -> Self {
-        Self {
-            slab: SlabMap::new(),
-            m: HashMap::new(),
-            log,
-        }
-    }
-    pub fn insert(&mut self, value: T) {
-        let key = self.slab.insert(value.clone());
-        self.m.insert(key, value.clone());
-        if self.log {
-            eprintln!("insert({:?}) -> {}", value, key);
-        }
-    }
-    pub fn remove(&mut self, key: usize) {
-        let l = self.slab.remove(key);
-        let r = self.m.remove(&key);
-        assert_eq!(l, r, "remove {}", key);
-        if self.log {
-            eprintln!("remove({}) -> {:?}", key, l);
-        }
-    }
-    pub fn clear(&mut self) {
-        self.slab.clear();
-        self.m.clear();
-        if self.log {
-            eprintln!("clear");
-        }
-    }
-    pub fn optimize(&mut self) {
-        self.slab.optimize();
-        if self.log {
-            eprintln!("optimize()");
-        }
-    }
-    pub fn reserve(&mut self, additional: usize) {
-        self.slab.reserve(additional);
-        if self.log {
-            eprintln!("reserve({})", additional);
-        }
-        assert!(self.slab.capacity() >= self.slab.len() + additional);
-    }
-    pub fn check(&mut self) {
-        assert_eq!(self.slab.len(), self.m.len(), "len");
-        let mut l: Vec<_> = self
-            .slab
-            .iter()
-            .map(|(key, value)| (key, value.clone()))
-            .collect();
-        let mut l_mut: Vec<_> = self
-            .slab
-            .iter_mut()
-            .map(|(key, value)| (key, value.clone()))
-            .collect();
-        let mut r: Vec<_> = self
-            .m
-            .iter()
-            .map(|(key, value)| (*key, value.clone()))
-            .collect();
-        l.sort();
-        l_mut.sort();
-        r.sort();
-        assert_eq!(l, r, "items");
-        assert_eq!(l_mut, r, "items mut");
+#[test]
+fn test_with_capacity() {
+    use slabmap::SlabMap;
 
-        if self.log {
-            eprintln!("{:?}", l);
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-enum Action {
-    Insert,
-    Remove(usize),
-    Clear,
-    Optimize,
-    Reserve(usize),
-}
-fn do_actions(actions: &[Action], log: bool) {
-    let mut t = Tester::new(log);
-    let mut c = 0;
-    for a in actions {
-        match a {
-            Action::Insert => t.insert(c),
-            Action::Remove(key) => t.remove(*key % (c + 2)),
-            Action::Clear => t.clear(),
-            Action::Optimize => t.optimize(),
-            Action::Reserve(additional) => t.reserve(*additional),
-        }
-        t.check();
-        c += 1;
-    }
-}
-
-fn make_action(max_key: usize) -> impl Strategy<Value = Action> {
-    prop_oneof![
-        5 => Just(Action::Insert),
-        5 => (0..max_key).prop_map(Action::Remove),
-        1 => Just(Action::Clear),
-        1 => Just(Action::Optimize),
-        1 => (0..100usize).prop_map(Action::Reserve)
-    ]
-}
-
-fn make_actions() -> impl Strategy<Value = (usize, Vec<Action>)> {
-    (1..100usize).prop_flat_map(|n| (Just(n), prop::collection::vec(make_action(n), n)))
-}
-
-proptest! {
-    #[test]
-    fn test_random(ref actions in make_actions()) {
-        do_actions(&actions.1, false);
+    for cap in 0..100 {
+        let s = SlabMap::<u32>::with_capacity(cap);
+        assert!(s.capacity() >= cap);
     }
 }
 
 #[test]
-fn test_x1() {
-    use Action::*;
-    let actions = vec![
-        Insert,
-        Insert,
-        Insert,
-        Insert,
-        Insert,
-        Remove(3),
-        Remove(1),
-        Remove(2),
-        Remove(0),
-        Insert,
-        Insert,
-        Insert,
-        Insert,
-        Insert,
-    ];
-    do_actions(&actions, false);
-}
-#[test]
-fn test_x2() {
-    use Action::*;
-    let actions = vec![Insert, Insert, Insert, Remove(0), Remove(1)];
-    do_actions(&actions, false);
-}
+fn test_retain() {
+    use slabmap::SlabMap;
 
-#[test]
-fn test_xx() {
-    // use Action::*;
-    // let actions = vec![Insert];
-    // do_actions(&actions, true);
-}
-
-#[test]
-fn debug() {
     let mut s = SlabMap::new();
-    s.insert(5);
     s.insert(10);
+    s.insert(15);
+    s.insert(20);
+    s.insert(25);
 
-    assert_eq!(format!("{:?}", s), "{0: 5, 1: 10}");
+    s.retain(|_idx, x| *x % 2 == 0);
+
+    let value: Vec<_> = s.values().cloned().collect();
+    assert_eq!(value, vec![10, 20]);
+}
+
+#[test]
+fn test_len() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    assert_eq!(s.len(), 0);
+
+    let key1 = s.insert(10);
+    let key2 = s.insert(15);
+
+    assert_eq!(s.len(), 2);
+
+    s.remove(key1);
+    assert_eq!(s.len(), 1);
+
+    s.remove(key2);
+    assert_eq!(s.len(), 0);
+}
+
+#[test]
+fn test_is_empty() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    assert_eq!(s.is_empty(), true);
+
+    let key = s.insert("a");
+    assert_eq!(s.is_empty(), false);
+
+    s.remove(key);
+    assert_eq!(s.is_empty(), true);
+}
+
+#[test]
+fn test_get() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    let key = s.insert(100);
+
+    assert_eq!(s.get(key), Some(&100));
+    assert_eq!(s.get(key + 1), None);
+}
+
+#[test]
+fn test_contains_key() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    let key = s.insert(100);
+
+    assert_eq!(s.contains_key(key), true);
+    assert_eq!(s.contains_key(key + 1), false);
+}
+
+#[test]
+fn test_insert() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    let key_abc = s.insert("abc");
+    let key_xyz = s.insert("xyz");
+
+    assert_eq!(s[key_abc], "abc");
+    assert_eq!(s[key_xyz], "xyz");
+}
+
+#[test]
+fn test_insert_with_key() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    let key = s.insert_with_key(|key| format!("my key is {}", key));
+
+    assert_eq!(s[key], format!("my key is {}", key));
+}
+
+#[test]
+fn test_remove() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    let key = s.insert("a");
+    assert_eq!(s.remove(key), Some("a"));
+    assert_eq!(s.remove(key), None);
+}
+
+#[test]
+fn test_clear() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    s.insert(1);
+    s.insert(2);
+
+    s.clear();
+
+    assert_eq!(s.is_empty(), true);
+}
+
+#[test]
+fn test_drain() {
+    use slabmap::SlabMap;
+
+    let mut s = SlabMap::new();
+    s.insert(10);
+    s.insert(20);
+
+    let d: Vec<_> = s.drain().collect();
+
+    assert_eq!(s.is_empty(), true);
+    assert_eq!(d, vec![10, 20]);
+}
+
+#[test]
+fn test_optimize() {
+    use slabmap::SlabMap;
+    use std::time::Instant;
+
+    let mut s = SlabMap::new();
+    const COUNT: usize = 1000000;
+    for i in 0..COUNT {
+        s.insert(i);
+    }
+    let keys: Vec<_> = s.keys().take(COUNT - 1).collect();
+    for key in keys {
+        s.remove(key);
+    }
+
+    s.optimize(); // if comment out this line, `s.values().sum()` to be slow.
+
+    let begin = Instant::now();
+    let sum: usize = s.values().sum();
+    println!("sum : {}", sum);
+    println!("duration : {} ms", (Instant::now() - begin).as_millis());
 }
