@@ -319,6 +319,7 @@ impl<T> SlabMap<T> {
             self.retain(|_, _| true);
         }
     }
+    #[inline]
     fn is_optimized(&self) -> bool {
         self.non_optimized == 0
     }
@@ -383,6 +384,7 @@ impl<T> SlabMap<T> {
     }
 }
 impl<T> Default for SlabMap<T> {
+    #[inline]
     fn default() -> Self {
         Self::new()
     }
@@ -411,6 +413,8 @@ impl<T> std::ops::IndexMut<usize> for SlabMap<T> {
 impl<T> IntoIterator for SlabMap<T> {
     type Item = T;
     type IntoIter = IntoIter<T>;
+
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
             iter: self.entries.into_iter(),
@@ -466,6 +470,7 @@ impl<T> Iterator for IntoIter<T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.len, Some(self.len))
     }
+    #[inline]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -502,6 +507,7 @@ impl<'a, T> Iterator for Drain<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.len, Some(self.len))
     }
+    #[inline]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -538,6 +544,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.len, Some(self.len))
     }
+    #[inline]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -576,6 +583,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.len, Some(self.len))
     }
+    #[inline]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -600,6 +608,7 @@ impl<'a, T> Iterator for Keys<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
+    #[inline]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -624,6 +633,7 @@ impl<'a, T> Iterator for Values<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
+    #[inline]
     fn count(self) -> usize
     where
         Self: Sized,
@@ -648,6 +658,7 @@ impl<'a, T> Iterator for ValuesMut<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
     }
+    #[inline]
     fn count(self) -> usize
     where
         Self: Sized,
