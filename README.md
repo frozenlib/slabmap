@@ -62,26 +62,26 @@ The following chart shows the difference in performance between
 
 ### Insert
 
-![insert performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/insert_large.svg?token=ACRPBICBTSIPIQNXU7QKMG267MEQK)
+![insert performance](https://github.com/frozenlib/slabmap/raw/images/bench/insert_large.svg)
 
 ### Remove random elements
 
-![remove random elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/remove_random_large_fast_only.svg?token=ACRPBIC62MWXTOVROVI4VVC67MERM)
+![remove random elements performance](https://github.com/frozenlib/slabmap/raw/images/bench/remove_random_large_fast_only.svg)
 
 ### Random access
 
-![random access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/get_random.svg?token=ACRPBIBAHCKOCZ4VUWPMQ3S67MESK)
+![random access performance](https://github.com/frozenlib/slabmap/raw/images/bench/get_random.svg)
 
 ### Sequential access
 
-![sequential access performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values.svg?token=ACRPBIGF2NHYAPVIAN35HKC67METS)
+![sequential access performance](https://github.com/frozenlib/slabmap/raw/images/bench/iter_key_values.svg)
 
 ### Sequential access after removing elements from a 10,000-element collection
 
 - x-axis : number of remaining elements
 - y-axis : average time (lower is better)
 
-![Sequential access after remove many elements performance](https://raw.githubusercontent.com/frozenlib/slabmap/images/bench/iter_key_values_removed.svg?token=ACRPBIAVZHDNT3CWUP6WAEC67MEUW)
+![Sequential access after remove many elements performance](https://github.com/frozenlib/slabmap/raw/images/bench/iter_key_values_removed.svg)
 
 ## License
 
