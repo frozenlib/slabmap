@@ -7,8 +7,12 @@
       "type": "shell",
       "label": "cargo test",
       "command": "cargo",
-      "args": ["test"],
-      "problemMatcher": ["$rustc"],
+      "args": [
+        "test"
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -31,8 +35,13 @@
       "type": "shell",
       "label": "cargo test xx",
       "command": "cargo",
-      "args": ["test", "test_xx"],
-      "problemMatcher": ["$rustc"],
+      "args": [
+        "test",
+        "test_xx"
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
       "presentation": {
         "panel": "dedicated",
         "clear": true
@@ -42,8 +51,12 @@
       "type": "shell",
       "label": "cargo build",
       "command": "cargo",
-      "args": ["build"],
-      "problemMatcher": ["$rustc"],
+      "args": [
+        "build"
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
       "presentation": {
         "panel": "dedicated",
         "clear": true
@@ -58,8 +71,14 @@
       "type": "shell",
       "label": "cargo bench",
       "command": "cargo",
-      "args": ["bench"],
-      "problemMatcher": ["$rustc"],
+      "args": [
+        "bench",
+        "--bench",
+        "regression"
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
       "group": {
         "kind": "test",
         "isDefault": true
@@ -71,28 +90,16 @@
     },
     {
       "type": "shell",
-      "label": "cargo bench update baseline",
-      "command": "cargo",
-      "args": ["bench", "--", "--save-baseline", "saved-base"],
-      "problemMatcher": ["$rustc"],
-      "presentation": {
-        "panel": "dedicated",
-        "clear": true
-      }
-    },
-    {
-      "type": "shell",
       "label": "cargo bench compare",
       "command": "cargo",
       "args": [
         "bench",
-        "--",
-        "--load-baseline",
-        "base",
-        "--baseline",
-        "saved-base"
+        "--bench",
+        "compare"
       ],
-      "problemMatcher": ["$rustc"],
+      "problemMatcher": [
+        "$rustc"
+      ],
       "presentation": {
         "panel": "dedicated",
         "clear": true
@@ -113,12 +120,58 @@
       "type": "shell",
       "label": "cargo doc open",
       "command": "cargo",
-      "args": ["+nightly", "doc", "--open", "--no-deps", "--all-features"],
-      "problemMatcher": ["$rustc"],
+      "args": [
+        "doc",
+        "--open",
+        "--no-deps",
+        "--all-features"
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
       "presentation": {
         "panel": "dedicated",
         "clear": true
       }
-    }
+    },
+    {
+      "type": "shell",
+      "label": "cargo clippy",
+      "command": "cargo",
+      "args": [
+        "clippy",
+        "--all-features",
+        "--target-dir",
+        "target/clippy",
+        "--",
+        "-W",
+        "clippy::all"
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
+      "presentation": {
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "type": "shell",
+      "label": "cargo update minimal-versions",
+      "command": "cargo",
+      "args": [
+        "+nightly",
+        "update",
+        "-Z",
+        "minimal-versions"
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
+      "presentation": {
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
   ]
 }
