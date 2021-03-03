@@ -15,7 +15,7 @@ edition = "2018"
 
 [dev-dependencies]
 proptest = "0.10"
-criterion = "0.3"
+criterion = "0.3.4"
 slab = "0.4"
 rand = "0.7"
 atty = "0.2.14" # Because criterion depends on a version of atty that cannot be compiled.
