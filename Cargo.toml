@@ -18,6 +18,7 @@ proptest = "0.10"
 criterion = "0.3.4"
 slab = "0.4"
 rand = "0.7"
+tinytemplate = "1.2.1" # Because criterion depends on a version of atty that cannot be compiled.
 atty = "0.2.14" # Because criterion depends on a version of atty that cannot be compiled.
 
 [lib]
