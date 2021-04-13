@@ -2,6 +2,7 @@ use proptest::prelude::*;
 use slabmap::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
+use test_strategy::{proptest, Arbitrary};
 
 struct Tester<T> {
     slab: SlabMap<T>,
@@ -81,14 +82,30 @@ impl<T: Clone + Eq + PartialEq + Debug + PartialOrd + Ord> Tester<T> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default)]
+struct Args {
+    max_key: usize,
+}
+#[derive(Debug, Clone, Arbitrary)]
+#[arbitrary(args = Args)]
 enum Action {
+    #[weight(5)]
     Insert,
-    Remove(usize),
+    #[weight(5)]
+    Remove(#[strategy(0..args.max_key)] usize),
     Clear,
     Optimize,
-    Reserve(usize),
+    Reserve(#[strategy(0..100usize)] usize),
 }
+
+#[derive(Debug, Clone, Arbitrary)]
+struct Actions {
+    #[strategy(0..100usize)]
+    len: usize,
+    #[strategy(prop::collection::vec(any_with::<Action>(Args { max_key: #len } ), #len))]
+    actions: Vec<Action>,
+}
+
 fn do_actions(actions: &[Action], log: bool) {
     let mut t = Tester::new(log);
     let mut c = 0;
@@ -105,25 +122,9 @@ fn do_actions(actions: &[Action], log: bool) {
     }
 }
 
-fn make_action(max_key: usize) -> impl Strategy<Value = Action> {
-    prop_oneof![
-        5 => Just(Action::Insert),
-        5 => (0..max_key).prop_map(Action::Remove),
-        1 => Just(Action::Clear),
-        1 => Just(Action::Optimize),
-        1 => (0..100usize).prop_map(Action::Reserve)
-    ]
-}
-
-fn make_actions() -> impl Strategy<Value = (usize, Vec<Action>)> {
-    (1..100usize).prop_flat_map(|n| (Just(n), prop::collection::vec(make_action(n), n)))
-}
-
-proptest! {
-    #[test]
-    fn test_random(ref actions in make_actions()) {
-        do_actions(&actions.1, false);
-    }
+#[proptest]
+fn test_random(actions: Actions) {
+    do_actions(&actions.actions, false);
 }
 
 #[test]
