@@ -56,13 +56,13 @@ fn test_is_empty() {
     use slabmap::SlabMap;
 
     let mut s = SlabMap::new();
-    assert_eq!(s.is_empty(), true);
+    assert!(s.is_empty());
 
     let key = s.insert("a");
-    assert_eq!(s.is_empty(), false);
+    assert!(!s.is_empty());
 
     s.remove(key);
-    assert_eq!(s.is_empty(), true);
+    assert!(s.is_empty());
 }
 
 #[test]
@@ -83,8 +83,8 @@ fn test_contains_key() {
     let mut s = SlabMap::new();
     let key = s.insert(100);
 
-    assert_eq!(s.contains_key(key), true);
-    assert_eq!(s.contains_key(key + 1), false);
+    assert!(s.contains_key(key));
+    assert!(!s.contains_key(key + 1));
 }
 
 #[test]
@@ -129,7 +129,7 @@ fn test_clear() {
 
     s.clear();
 
-    assert_eq!(s.is_empty(), true);
+    assert!(s.is_empty());
 }
 
 #[test]
@@ -142,7 +142,7 @@ fn test_drain() {
 
     let d: Vec<_> = s.drain().collect();
 
-    assert_eq!(s.is_empty(), true);
+    assert!(s.is_empty());
     assert_eq!(d, vec![10, 20]);
 }
 

@@ -108,8 +108,7 @@ struct Actions {
 
 fn do_actions(actions: &[Action], log: bool) {
     let mut t = Tester::new(log);
-    let mut c = 0;
-    for a in actions {
+    for (c, a) in actions.iter().enumerate() {
         match a {
             Action::Insert => t.insert(c),
             Action::Remove(key) => t.remove(*key % (c + 2)),
@@ -118,7 +117,6 @@ fn do_actions(actions: &[Action], log: bool) {
             Action::Reserve(additional) => t.reserve(*additional),
         }
         t.check();
-        c += 1;
     }
 }
 

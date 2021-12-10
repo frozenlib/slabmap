@@ -357,8 +357,8 @@ trait BenchTarget: Clone {
     fn new_n_retain(n: usize, m: usize) -> Self {
         let mut s = Self::new_n(n);
         let keys = make_random_keys(n);
-        for i in m..n {
-            s.remove(keys[i]);
+        for &key in &keys[m..n] {
+            s.remove(key);
         }
         s
     }
