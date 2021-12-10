@@ -101,8 +101,8 @@ enum Action {
 #[derive(Debug, Clone, Arbitrary)]
 struct Actions {
     #[strategy(0..100usize)]
-    len: usize,
-    #[strategy(prop::collection::vec(any_with::<Action>(Args { max_key: #len } ), #len))]
+    _len: usize,
+    #[strategy(prop::collection::vec(any_with::<Action>(Args { max_key: #_len } ), #_len))]
     actions: Vec<Action>,
 }
 
