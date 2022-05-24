@@ -9,7 +9,7 @@ documentation = "https://docs.rs/slabmap/"
 keywords = ["slab", "allocator", "map", "vec"]
 categories = ["data-structures", "memory-management"]
 description = "HashMap-like collection that automatically determines the key."
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 
