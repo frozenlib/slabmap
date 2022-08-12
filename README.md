@@ -48,7 +48,7 @@ Carl Lerche's [`slab`](https://crates.io/crates/slab) crate provides a slab impl
 
 For both `Slab` and `SlabMap`, after adding many elements to the collection, removing many element will reduce iterate performance.
 
-However, unlike `Slab`, `SlabMap` can improve iterate performance by calling `optimize()`.
+However, unlike `Slab`, `SlabMap` can improve iterate performance by calling [`SlabMap::optimize()`](https://docs.rs/slabmap/latest/slabmap/struct.SlabMap.html#method.optimize).
 
 ## Performance
 
