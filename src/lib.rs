@@ -22,7 +22,7 @@ assert_eq!(s.remove(key_a), None);
 ```
 */
 
-use std::{fmt::Debug, iter::FusedIterator, mem::replace};
+use std::{collections::TryReserveError, fmt::Debug, iter::FusedIterator, mem::replace};
 /**
 A fast HashMap-like collection that automatically determines the key.
 */
@@ -81,6 +81,13 @@ impl<T> SlabMap<T> {
         self.entries.reserve(self.entries_additional(additional));
     }
 
+    /// Try to reserve capacity for at least additional more elements to be inserted in the given SlabMap<T>.
+    #[inline]
+    pub fn try_reserve(&mut self, additional: usize) -> Result<(), TryReserveError> {
+        self.entries
+            .try_reserve(self.entries_additional(additional))
+    }
+
     /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given SlabMap<T>.
     ///
     /// # Panics
@@ -89,6 +96,13 @@ impl<T> SlabMap<T> {
     pub fn reserve_exact(&mut self, additional: usize) {
         self.entries
             .reserve_exact(self.entries_additional(additional));
+    }
+
+    /// Try to reserve the minimum capacity for exactly additional more elements to be inserted in the given SlabMap<T>.
+    #[inline]
+    pub fn try_reserve_exact(&mut self, additional: usize) -> Result<(), TryReserveError> {
+        self.entries
+            .try_reserve_exact(self.entries_additional(additional))
     }
 
     #[inline]
