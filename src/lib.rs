@@ -46,7 +46,7 @@ impl<T> SlabMap<T> {
     /// Constructs a new, empty SlabMap<T>.
     /// The SlabMap will not allocate until elements are pushed onto it.
     #[inline]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             entries: Vec::new(),
             next_vacant_idx: INVALID_INDEX,
