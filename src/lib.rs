@@ -31,7 +31,7 @@ pub struct SlabMap<T> {
     entries: Vec<Entry<T>>,
     next_vacant_idx: usize,
     len: usize,
-    non_optimized: usize,
+    non_optimized_count: usize,
 }
 const INVALID_INDEX: usize = usize::MAX;
 
@@ -51,7 +51,7 @@ impl<T> SlabMap<T> {
             entries: Vec::new(),
             next_vacant_idx: INVALID_INDEX,
             len: 0,
-            non_optimized: 0,
+            non_optimized_count: 0,
         }
     }
 
@@ -62,7 +62,7 @@ impl<T> SlabMap<T> {
             entries: Vec::with_capacity(capacity),
             next_vacant_idx: INVALID_INDEX,
             len: 0,
-            non_optimized: 0,
+            non_optimized_count: 0,
         }
     }
 
@@ -253,7 +253,7 @@ impl<T> SlabMap<T> {
                 Entry::Occupied(_) => unreachable!(),
             };
             self.entries[idx] = Entry::Occupied(f(idx));
-            self.non_optimized = self.non_optimized.saturating_sub(1);
+            self.non_optimized_count = self.non_optimized_count.saturating_sub(1);
         } else {
             idx = self.entries.len();
             self.entries.push(Entry::Occupied(f(idx)));
@@ -290,7 +290,7 @@ impl<T> SlabMap<T> {
                 },
             );
             self.next_vacant_idx = key;
-            self.non_optimized += 1;
+            self.non_optimized_count += 1;
             e
         };
         if self.is_empty() {
@@ -321,7 +321,7 @@ impl<T> SlabMap<T> {
         self.entries.clear();
         self.len = 0;
         self.next_vacant_idx = INVALID_INDEX;
-        self.non_optimized = 0;
+        self.non_optimized_count = 0;
     }
 
     /// Clears the SlabMap, returning all values as an iterator and optimize free spaces.
@@ -343,7 +343,7 @@ impl<T> SlabMap<T> {
         let len = self.len;
         self.len = 0;
         self.next_vacant_idx = INVALID_INDEX;
-        self.non_optimized = 0;
+        self.non_optimized_count = 0;
         Drain {
             iter: self.entries.drain(..),
             len,
@@ -395,7 +395,7 @@ impl<T> SlabMap<T> {
             }
         }
         self.entries.truncate(idx_vacant_start);
-        self.non_optimized = 0;
+        self.non_optimized_count = 0;
     }
 
     /// Optimizing the free space for speeding up iterations.
@@ -431,7 +431,7 @@ impl<T> SlabMap<T> {
     }
     #[inline]
     fn is_optimized(&self) -> bool {
-        self.non_optimized == 0
+        self.non_optimized_count == 0
     }
     fn merge_vacant(&mut self, start: usize, end: usize) {
         if start < end {
