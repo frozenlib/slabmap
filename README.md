@@ -2,7 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/slabmap.svg)](https://crates.io/crates/slabmap)
 [![Docs.rs](https://docs.rs/slabmap/badge.svg)](https://docs.rs/slabmap/)
-[![Actions Status](https://github.com/frozenlib/slabmap/workflows/Rust/badge.svg)](https://github.com/frozenlib/slabmap/actions)
+[![Actions Status](https://github.com/frozenlib/slabmap/workflows/CI/badge.svg)](https://github.com/frozenlib/slabmap/actions)
 
 This crate provides the type `SlabMap`.
 `SlabMap` is HashMap-like collection that automatically determines the key.
