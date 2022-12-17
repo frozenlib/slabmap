@@ -168,3 +168,46 @@ fn test_optimize() {
     println!("sum : {}", sum);
     println!("duration : {} ms", (Instant::now() - begin).as_millis());
 }
+
+#[test]
+fn insert_remove_capacity() {
+    use slabmap::SlabMap;
+    let mut s = SlabMap::new();
+    let mut keys = Vec::new();
+    for _ in 0..10 {
+        s.insert(11);
+    }
+    for _ in 0..100 {
+        keys.push(s.insert(10));
+    }
+    let capacity = s.capacity();
+    for _ in 0..1000 {
+        for key in keys.drain(..) {
+            s.remove(key);
+        }
+        for _ in 0..100 {
+            keys.push(s.insert(10));
+        }
+    }
+    assert_eq!(capacity, s.capacity());
+}
+
+#[test]
+fn insert_remove_capacity_all() {
+    use slabmap::SlabMap;
+    let mut s = SlabMap::new();
+    let mut keys = Vec::new();
+    for _ in 0..100 {
+        keys.push(s.insert(10));
+    }
+    let capacity = s.capacity();
+    for _ in 0..1000 {
+        for key in keys.drain(..) {
+            s.remove(key);
+        }
+        for _ in 0..100 {
+            keys.push(s.insert(10));
+        }
+    }
+    assert_eq!(capacity, s.capacity());
+}
