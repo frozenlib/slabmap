@@ -238,7 +238,7 @@ trait BenchFunc {
     fn not_available<T: BenchTarget>(g: &mut BenchmarkGroup<WallTime>) {
         let input = 0usize;
         g.bench_with_input(
-            BenchmarkId::new(&format!("{} - n/a", T::NAME), input),
+            BenchmarkId::new(format!("{} - n/a", T::NAME), input),
             &input,
             |b, i| b.iter(|| i + 10),
         );
