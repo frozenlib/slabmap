@@ -20,6 +20,8 @@ criterion = "0.4.0"
 slab = "0.4.7"
 rand = "0.8.5"
 atty = "0.2.14"         # Because criterion depends on a version of atty that cannot be compiled.
+serde = "1.0.151"       # Because criterion depends on a version of serde that cannot be compiled.
+regex = "1.7.0"         # Because criterion depends on a version of regex that cannot be compiled.
 
 
 [lib]
