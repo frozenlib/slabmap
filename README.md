@@ -13,7 +13,7 @@ Add this to your Cargo.toml:
 
 ```toml
 [dependencies]
-slabmap = "0.1"
+slabmap = "0.2.0"
 ```
 
 ## Examples
