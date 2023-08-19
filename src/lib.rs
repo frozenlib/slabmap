@@ -48,7 +48,7 @@ enum Entry<T> {
 }
 
 impl<T> SlabMap<T> {
-    /// Constructs a new, empty SlabMap<T>.
+    /// Constructs a new, empty `SlabMap<T>`.
     /// The SlabMap will not allocate until elements are pushed onto it.
     #[inline]
     pub const fn new() -> Self {
@@ -60,7 +60,7 @@ impl<T> SlabMap<T> {
         }
     }
 
-    /// Constructs a new, empty SlabMap<T> with the specified capacity.
+    /// Constructs a new, empty `SlabMap<T>` with the specified capacity.
     #[inline]
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
@@ -77,7 +77,7 @@ impl<T> SlabMap<T> {
         self.entries.capacity()
     }
 
-    /// Reserves capacity for at least additional more elements to be inserted in the given SlabMap<T>.
+    /// Reserves capacity for at least additional more elements to be inserted in the given `SlabMap<T>`.
     ///
     /// # Panics
     /// Panics if the new capacity overflows usize.    
@@ -86,14 +86,14 @@ impl<T> SlabMap<T> {
         self.entries.reserve(self.entries_additional(additional));
     }
 
-    /// Try to reserve capacity for at least additional more elements to be inserted in the given SlabMap<T>.
+    /// Try to reserve capacity for at least additional more elements to be inserted in the given `SlabMap<T>`.
     #[inline]
     pub fn try_reserve(&mut self, additional: usize) -> Result<(), TryReserveError> {
         self.entries
             .try_reserve(self.entries_additional(additional))
     }
 
-    /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given SlabMap<T>.
+    /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given `SlabMap<T>`.
     ///
     /// # Panics
     /// Panics if the new capacity overflows usize.    
@@ -103,7 +103,7 @@ impl<T> SlabMap<T> {
             .reserve_exact(self.entries_additional(additional));
     }
 
-    /// Try to reserve the minimum capacity for exactly additional more elements to be inserted in the given SlabMap<T>.
+    /// Try to reserve the minimum capacity for exactly additional more elements to be inserted in the given `SlabMap<T>`.
     #[inline]
     pub fn try_reserve_exact(&mut self, additional: usize) -> Result<(), TryReserveError> {
         self.entries
@@ -594,7 +594,7 @@ impl<T> Iterator for IntoIter<T> {
     }
 }
 
-/// A draining iterator for SlabMap<T>.
+/// A draining iterator for `SlabMap<T>`.
 ///
 /// This struct is created by the [`drain`](SlabMap::drain) method on [`SlabMap`].
 pub struct Drain<'a, T> {
