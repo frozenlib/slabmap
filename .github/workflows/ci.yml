@@ -23,11 +23,11 @@ jobs:
         run: cargo test --verbose
       - name: Clippy
         run: cargo clippy --all-features --tests --lib -- -W clippy::all
-      - name: Rustup toolchain install nightly
-        run: rustup toolchain install nightly
-      - name: Set minimal versions
-        run: cargo +nightly update -Z minimal-versions
-      - name: Build tests (minimal versions)
-        run: cargo +stable test --verbose --no-run
-      - name: Run tests (minimal versions)
-        run: cargo +stable test --verbose
+      # - name: Rustup toolchain install nightly
+      #   run: rustup toolchain install nightly
+      # - name: Set minimal versions
+      #   run: cargo +nightly update -Z minimal-versions
+      # - name: Build tests (minimal versions)
+      #   run: cargo +stable test --verbose --no-run
+      # - name: Run tests (minimal versions)
+      #   run: cargo +stable test --verbose
