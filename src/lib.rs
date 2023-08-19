@@ -22,7 +22,12 @@ assert_eq!(s.remove(key_a), None);
 ```
 */
 
-use std::{collections::TryReserveError, fmt::Debug, iter::FusedIterator, mem::replace};
+use std::{
+    collections::TryReserveError,
+    fmt::Debug,
+    iter::{Enumerate, FusedIterator},
+    mem::replace,
+};
 /**
 A fast HashMap-like collection that automatically determines the key.
 */
@@ -521,13 +526,13 @@ impl<T> std::ops::IndexMut<usize> for SlabMap<T> {
 }
 
 impl<T> IntoIterator for SlabMap<T> {
-    type Item = T;
+    type Item = (usize, T);
     type IntoIter = IntoIter<T>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
-            iter: self.entries.into_iter(),
+            iter: self.entries.into_iter().enumerate(),
             len: self.len,
         }
     }
@@ -556,19 +561,19 @@ impl<'a, T> IntoIterator for &'a mut SlabMap<T> {
 ///
 /// This struct is created by the `into_iter` method on [`SlabMap`] (provided by the IntoIterator trait).
 pub struct IntoIter<T> {
-    iter: std::vec::IntoIter<Entry<T>>,
+    iter: Enumerate<std::vec::IntoIter<Entry<T>>>,
     len: usize,
 }
 impl<T> Iterator for IntoIter<T> {
-    type Item = T;
+    type Item = (usize, T);
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let mut e_opt = self.iter.next();
         while let Some(e) = e_opt {
-            e_opt = match e {
+            e_opt = match e.1 {
                 Entry::Occupied(value) => {
                     self.len -= 1;
-                    return Some(value);
+                    return Some((e.0, value));
                 }
                 Entry::VacantHead { vacant_body_len } => self.iter.nth(vacant_body_len + 1),
                 Entry::VacantTail { .. } => self.iter.next(),

@@ -1,3 +1,5 @@
+use slabmap::SlabMap;
+
 #[test]
 fn test_new() {
     use slabmap::SlabMap;
@@ -210,4 +212,19 @@ fn insert_remove_capacity_all() {
         }
     }
     assert_eq!(capacity, s.capacity());
+}
+
+#[test]
+fn into_iter() {
+    let mut s = SlabMap::new();
+    let k0 = s.insert(0);
+    let k1 = s.insert(1);
+    let k2 = s.insert(2);
+    s.remove(k1);
+
+    let a: Vec<_> = s.into_iter().collect();
+    let mut e = vec![(k0, 0), (k2, 2)];
+    e.sort();
+
+    assert_eq!(a, e);
 }
