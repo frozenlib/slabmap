@@ -139,13 +139,15 @@ fn test_drain() {
     use slabmap::SlabMap;
 
     let mut s = SlabMap::new();
-    s.insert(10);
-    s.insert(20);
+    let k0 = s.insert(10);
+    let k1 = s.insert(20);
 
     let d: Vec<_> = s.drain().collect();
+    let mut e = vec![(k0, 10), (k1, 20)];
+    e.sort();
 
     assert!(s.is_empty());
-    assert_eq!(d, vec![10, 20]);
+    assert_eq!(d, e);
 }
 
 #[test]

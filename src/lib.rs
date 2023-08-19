@@ -336,13 +336,15 @@ impl<T> SlabMap<T> {
     /// use slabmap::SlabMap;
     ///
     /// let mut s = SlabMap::new();
-    /// s.insert(10);
-    /// s.insert(20);
+    /// let k0 = s.insert(10);
+    /// let k1 = s.insert(20);
     ///
     /// let d: Vec<_> = s.drain().collect();
+    /// let mut e = vec![(k0, 10), (k1, 20)];
+    /// e.sort();
     ///
     /// assert_eq!(s.is_empty(), true);
-    /// assert_eq!(d, vec![10, 20]);
+    /// assert_eq!(d, e);
     /// ```
     pub fn drain(&mut self) -> Drain<T> {
         let len = self.len;
@@ -350,7 +352,7 @@ impl<T> SlabMap<T> {
         self.next_vacant_idx = INVALID_INDEX;
         self.non_optimized_count = 0;
         Drain {
-            iter: self.entries.drain(..),
+            iter: self.entries.drain(..).enumerate(),
             len,
         }
     }
@@ -598,19 +600,19 @@ impl<T> Iterator for IntoIter<T> {
 ///
 /// This struct is created by the [`drain`](SlabMap::drain) method on [`SlabMap`].
 pub struct Drain<'a, T> {
-    iter: std::vec::Drain<'a, Entry<T>>,
+    iter: Enumerate<std::vec::Drain<'a, Entry<T>>>,
     len: usize,
 }
 impl<'a, T> Iterator for Drain<'a, T> {
-    type Item = T;
+    type Item = (usize, T);
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let mut e_opt = self.iter.next();
         while let Some(e) = e_opt {
-            e_opt = match e {
+            e_opt = match e.1 {
                 Entry::Occupied(value) => {
                     self.len -= 1;
-                    return Some(value);
+                    return Some((e.0, value));
                 }
                 Entry::VacantHead { vacant_body_len } => self.iter.nth(vacant_body_len + 1),
                 Entry::VacantTail { .. } => self.iter.next(),
