@@ -12,6 +12,7 @@ description = "HashMap-like collection that automatically determines the key."
 edition = "2021"
 
 [dependencies]
+derive-ex = "0.1.7"
 
 [dev-dependencies]
 proptest = "1.2.0"

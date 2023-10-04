@@ -230,3 +230,19 @@ fn into_iter() {
 
     assert_eq!(a, e);
 }
+
+#[test]
+fn clone_from() {
+    let mut s0 = SlabMap::new();
+    let mut s1 = SlabMap::new();
+    for _ in 0..10 {
+        s0.insert(0);
+    }
+    for _ in 0..1000 {
+        s1.insert(0);
+    }
+    let cap_old = s1.capacity();
+    s1.clone_from(&s0);
+    let cap_new = s1.capacity();
+    assert_eq!(cap_old, cap_new);
+}

@@ -28,10 +28,13 @@ use std::{
     iter::{Enumerate, FusedIterator},
     mem::replace,
 };
+
+use derive_ex::derive_ex;
+
 /**
 A fast HashMap-like collection that automatically determines the key.
 */
-#[derive(Clone)]
+#[derive_ex(Clone(bound(T)))]
 pub struct SlabMap<T> {
     entries: Vec<Entry<T>>,
     next_vacant_idx: usize,
