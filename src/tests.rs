@@ -1,17 +1,15 @@
-use slabmap::SlabMap;
+use std::time::Instant;
+
+use crate::SlabMap;
 
 #[test]
 fn test_new() {
-    use slabmap::SlabMap;
-
     let s = SlabMap::<u32>::new();
     assert_eq!(s.len(), 0);
 }
 
 #[test]
 fn test_with_capacity() {
-    use slabmap::SlabMap;
-
     for cap in 0..100 {
         let s = SlabMap::<u32>::with_capacity(cap);
         assert!(s.capacity() >= cap);
@@ -20,8 +18,6 @@ fn test_with_capacity() {
 
 #[test]
 fn test_retain() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     s.insert(10);
     s.insert(15);
@@ -37,8 +33,6 @@ fn test_retain() {
 
 #[test]
 fn test_len() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     assert_eq!(s.len(), 0);
 
@@ -56,8 +50,6 @@ fn test_len() {
 
 #[test]
 fn test_is_empty() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     assert!(s.is_empty());
 
@@ -70,8 +62,6 @@ fn test_is_empty() {
 
 #[test]
 fn test_get() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     let key = s.insert(100);
 
@@ -81,8 +71,6 @@ fn test_get() {
 
 #[test]
 fn test_contains_key() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     let key = s.insert(100);
 
@@ -92,8 +80,6 @@ fn test_contains_key() {
 
 #[test]
 fn test_insert() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     let key_abc = s.insert("abc");
     let key_xyz = s.insert("xyz");
@@ -104,8 +90,6 @@ fn test_insert() {
 
 #[test]
 fn test_insert_with_key() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     let key = s.insert_with_key(|key| format!("my key is {}", key));
 
@@ -114,8 +98,6 @@ fn test_insert_with_key() {
 
 #[test]
 fn test_remove() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     let key = s.insert("a");
     assert_eq!(s.remove(key), Some("a"));
@@ -124,8 +106,6 @@ fn test_remove() {
 
 #[test]
 fn test_clear() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     s.insert(1);
     s.insert(2);
@@ -137,8 +117,6 @@ fn test_clear() {
 
 #[test]
 fn test_drain() {
-    use slabmap::SlabMap;
-
     let mut s = SlabMap::new();
     let k0 = s.insert(10);
     let k1 = s.insert(20);
@@ -153,9 +131,6 @@ fn test_drain() {
 
 #[test]
 fn test_optimize() {
-    use slabmap::SlabMap;
-    use std::time::Instant;
-
     let mut s = SlabMap::new();
     const COUNT: usize = 1000000;
     for i in 0..COUNT {
@@ -176,7 +151,6 @@ fn test_optimize() {
 
 #[test]
 fn insert_remove_capacity() {
-    use slabmap::SlabMap;
     let mut s = SlabMap::new();
     let mut keys = Vec::new();
     for _ in 0..10 {
@@ -199,7 +173,6 @@ fn insert_remove_capacity() {
 
 #[test]
 fn insert_remove_capacity_all() {
-    use slabmap::SlabMap;
     let mut s = SlabMap::new();
     let mut keys = Vec::new();
     for _ in 0..100 {
@@ -246,4 +219,12 @@ fn clone_from() {
     s1.clone_from(&s0);
     let cap_new = s1.capacity();
     assert_eq!(cap_old, cap_new);
+}
+
+#[test]
+fn from_iter() {
+    let s: SlabMap<usize> = [(5, 1), (0, 3)].into_iter().collect();
+    assert_eq!(s.len(), 2, "len");
+    assert_eq!(s[5], 1);
+    assert_eq!(s[0], 3);
 }

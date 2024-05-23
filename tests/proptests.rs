@@ -1,6 +1,7 @@
+use proptest::collection::vec;
 use proptest::prelude::*;
 use slabmap::*;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fmt::Debug;
 use test_strategy::{proptest, Arbitrary};
 
@@ -167,4 +168,13 @@ fn debug() {
     s.insert(10);
 
     assert_eq!(format!("{:?}", s), "{0: 5, 1: 10}");
+}
+
+#[proptest]
+fn from_iter(#[strategy(vec((0..16usize, 0..10016usize), 0..16))] key_values: Vec<(usize, usize)>) {
+    let a = SlabMap::from_iter(key_values.clone());
+    let e: BTreeMap<usize, usize> = BTreeMap::from_iter(key_values);
+    let a: Vec<_> = a.into_iter().collect();
+    let e: Vec<_> = e.into_iter().collect();
+    assert_eq!(a, e);
 }

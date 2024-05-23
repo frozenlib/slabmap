@@ -8,8 +8,8 @@
       "label": "cargo test",
       "command": "cargo",
       "args": [
-        "nextest",
-        "run",
+        "test",
+        "--doc",
       ],
       "problemMatcher": [
         "$rustc"
@@ -18,6 +18,34 @@
         "kind": "build",
         "isDefault": true
       },
+      "presentation": {
+        "panel": "dedicated",
+        "clear": true
+      },
+      "options": {
+        "env": {
+          // "RUST_BACKTRACE": "1",
+          "PROPTEST_CASES": "10000",
+          "PROPTEST_MAX_GLOBAL_REJECTS": "10000",
+          "PROPTEST_MAX_LOCAL_REJECTS": "200000",
+          "PROPTEST_MAX_SHRINK_ITERS": "1000000"
+        }
+      },
+      "dependsOn": [
+        "cargo nextest",
+      ]
+    },
+    {
+      "type": "shell",
+      "label": "cargo nextest",
+      "command": "cargo",
+      "args": [
+        "nextest",
+        "run",
+      ],
+      "problemMatcher": [
+        "$rustc"
+      ],
       "presentation": {
         "panel": "dedicated",
         "clear": true

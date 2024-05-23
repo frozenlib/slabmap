@@ -31,9 +31,13 @@ use std::{
 
 use derive_ex::derive_ex;
 
+#[cfg(test)]
+mod tests;
+
 /**
 A fast HashMap-like collection that automatically determines the key.
 */
+
 #[derive_ex(Clone(bound(T)))]
 pub struct SlabMap<T> {
     entries: Vec<Entry<T>>,
@@ -43,7 +47,7 @@ pub struct SlabMap<T> {
 }
 const INVALID_INDEX: usize = usize::MAX;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Entry<T> {
     Occupied(T),
     VacantHead { vacant_body_len: usize },
@@ -81,9 +85,11 @@ impl<T> SlabMap<T> {
     ) -> Self {
         let mut entries = Vec::with_capacity(capacity);
         for (key, value) in iter {
-            entries.resize_with(key + 1, || Entry::VacantTail {
-                next_vacant_idx: INVALID_INDEX,
-            });
+            if key >= entries.len() {
+                entries.resize_with(key + 1, || Entry::VacantTail {
+                    next_vacant_idx: INVALID_INDEX,
+                });
+            }
             entries[key] = Entry::Occupied(value);
         }
         let mut this = Self {
@@ -92,7 +98,7 @@ impl<T> SlabMap<T> {
             len: usize::MAX,
             non_optimized_count: usize::MAX,
         };
-        this.optimize();
+        this.force_optimize();
         this
     }
 
