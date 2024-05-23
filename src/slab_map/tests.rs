@@ -228,3 +228,133 @@ fn from_iter() {
     assert_eq!(s[5], 1);
     assert_eq!(s[0], 3);
 }
+
+#[test]
+fn merge_vacant() {
+    let mut s: SlabMap<_> = [(0, 10), (1, 11), (2, 12), (3, 13)].into_iter().collect();
+    s.remove(1);
+    s.remove(2);
+    s.optimize();
+    let e = vec![(0, 10), (3, 13)];
+
+    let a: Vec<_> = s.iter().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.iter_mut().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.into_iter().collect();
+    assert_eq!(a, e);
+}
+
+#[test]
+fn merge_vacant_insert() {
+    let mut s: SlabMap<_> = [(0, 10), (1, 11), (2, 12), (3, 13)].into_iter().collect();
+    s.remove(1);
+    s.remove(2);
+    s.optimize();
+    let key = s.insert(99);
+    let e = vec![(0, 10), (key, 99), (3, 13)];
+    let a: Vec<_> = s.iter().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.iter_mut().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.into_iter().collect();
+    assert_eq!(a, e);
+}
+
+#[test]
+fn merge_vacant_insert_2() {
+    let mut s: SlabMap<_> = [(0, 10), (1, 11), (2, 12), (3, 13), (4, 14)]
+        .into_iter()
+        .collect();
+    s.remove(1);
+    s.remove(2);
+    s.remove(3);
+    s.optimize();
+    let key = s.insert(99);
+    let e = vec![(0, 10), (key, 99), (4, 14)];
+    let a: Vec<_> = s.iter().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.iter_mut().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.into_iter().collect();
+    assert_eq!(a, e);
+}
+
+#[test]
+fn merge_vacant_2time() {
+    let mut s: SlabMap<_> = [(0, 10), (1, 11), (2, 12), (3, 13), (4, 14), (5, 15)]
+        .into_iter()
+        .collect();
+    s.remove(1);
+    s.remove(2);
+    s.optimize();
+    s.remove(4);
+    s.optimize();
+
+    let e = vec![(0, 10), (3, 13), (5, 15)];
+
+    let a: Vec<_> = s.iter().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.iter_mut().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.into_iter().collect();
+    assert_eq!(a, e);
+}
+
+#[test]
+fn merge_vacant_2part() {
+    let mut s: SlabMap<_> = [(0, 10), (1, 11), (2, 12), (3, 13), (4, 14)]
+        .into_iter()
+        .collect();
+    s.remove(1);
+    s.remove(2);
+    s.remove(4);
+    s.optimize();
+    let e = vec![(0, 10), (3, 13)];
+
+    let a: Vec<_> = s.iter().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.iter_mut().map(|(k, v)| (k, *v)).collect();
+    assert_eq!(a, e);
+
+    let a: Vec<_> = s.into_iter().collect();
+    assert_eq!(a, e);
+}
+
+#[test]
+fn merge_vacant_drain() {
+    let mut s: SlabMap<_> = [(0, 10), (1, 11), (2, 12), (3, 13), (4, 14)]
+        .into_iter()
+        .collect();
+    s.remove(1);
+    s.remove(2);
+    s.remove(3);
+    s.optimize();
+
+    let e = vec![(0, 10), (4, 14)];
+    let a: Vec<_> = s.drain().collect();
+    assert_eq!(a, e);
+}
+
+#[test]
+fn reserve() {
+    let mut s: SlabMap<u32> = SlabMap::new();
+    s.reserve(10);
+    assert!(s.capacity() >= 10);
+}
+
+#[test]
+fn reserve_exact() {
+    let mut s: SlabMap<u32> = SlabMap::new();
+    s.reserve_exact(10);
+    assert!(s.capacity() == 10);
+}
