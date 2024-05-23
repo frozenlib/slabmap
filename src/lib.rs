@@ -74,6 +74,7 @@ impl<T> SlabMap<T> {
         }
     }
 
+    /// Constructs as new `SlabMap<T>` from keys and values with at least the specified capacity.
     pub fn from_iter_with_capacity(
         iter: impl IntoIterator<Item = (usize, T)>,
         capacity: usize,
@@ -572,6 +573,12 @@ impl<T> std::ops::IndexMut<usize> for SlabMap<T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.get_mut(index).expect("out of index.")
+    }
+}
+
+impl<T> FromIterator<(usize, T)> for SlabMap<T> {
+    fn from_iter<I: IntoIterator<Item = (usize, T)>>(iter: I) -> Self {
+        Self::from_iter_with_capacity(iter, 0)
     }
 }
 
