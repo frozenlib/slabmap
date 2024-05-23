@@ -378,9 +378,12 @@ impl<T> SlabMap<T> {
     /// assert_eq!(value, vec![10, 20]);
     /// ```
     pub fn retain(&mut self, f: impl FnMut(usize, &mut T) -> bool) {
-        let mut f = f;
+        self.merge_vacants(f)
+    }
+    fn merge_vacants(&mut self, mut f: impl FnMut(usize, &mut T) -> bool) {
         let mut idx = 0;
-        let mut idx_vacant_start = 0;
+        let mut vacant_head_idx = 0;
+        let mut prev_vacant_tail_idx = None;
         self.next_vacant_idx = INVALID_INDEX;
         while let Some(e) = self.entries.get_mut(idx) {
             match e {
@@ -392,9 +395,9 @@ impl<T> SlabMap<T> {
                 }
                 Entry::Occupied(value) => {
                     if f(idx, value) {
-                        self.merge_vacant(idx_vacant_start, idx);
+                        self.set_vacants(vacant_head_idx, idx, &mut prev_vacant_tail_idx);
                         idx += 1;
-                        idx_vacant_start = idx;
+                        vacant_head_idx = idx;
                     } else {
                         self.entries[idx] = Entry::VacantTail {
                             next_vacant_idx: INVALID_INDEX,
@@ -404,8 +407,35 @@ impl<T> SlabMap<T> {
                 }
             }
         }
-        self.entries.truncate(idx_vacant_start);
+        self.entries.truncate(vacant_head_idx);
         self.non_optimized_count = 0;
+    }
+    fn set_vacants(
+        &mut self,
+        vacant_head_idx: usize,
+        vacant_end_idx: usize,
+        prev_vacant_tail_idx: &mut Option<usize>,
+    ) {
+        if vacant_head_idx >= vacant_end_idx {
+            return;
+        }
+        if self.next_vacant_idx == INVALID_INDEX {
+            self.next_vacant_idx = vacant_head_idx;
+        }
+        if vacant_head_idx + 2 <= vacant_end_idx {
+            self.entries[vacant_head_idx] = Entry::VacantHead {
+                vacant_body_len: vacant_end_idx - (vacant_head_idx + 2),
+            };
+        }
+        self.entries[vacant_end_idx - 1] = Entry::VacantTail {
+            next_vacant_idx: INVALID_INDEX,
+        };
+        if let Some(prev_vacant_tail_idx) = *prev_vacant_tail_idx {
+            self.entries[prev_vacant_tail_idx] = Entry::VacantTail {
+                next_vacant_idx: vacant_head_idx,
+            };
+        }
+        *prev_vacant_tail_idx = Some(vacant_end_idx - 1);
     }
 
     /// Optimizing the free space for speeding up iterations.
@@ -436,25 +466,12 @@ impl<T> SlabMap<T> {
     /// ```
     pub fn optimize(&mut self) {
         if !self.is_optimized() {
-            self.retain(|_, _| true);
+            self.merge_vacants(|_, _| true);
         }
     }
     #[inline]
     fn is_optimized(&self) -> bool {
         self.non_optimized_count == 0
-    }
-    fn merge_vacant(&mut self, start: usize, end: usize) {
-        if start < end {
-            if start < end - 1 {
-                self.entries[start] = Entry::VacantHead {
-                    vacant_body_len: end - start - 2,
-                }
-            }
-            self.entries[end - 1] = Entry::VacantTail {
-                next_vacant_idx: self.next_vacant_idx,
-            };
-            self.next_vacant_idx = start;
-        }
     }
 
     /// Gets an iterator over the entries of the SlabMap, sorted by key.
