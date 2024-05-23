@@ -12,13 +12,13 @@ description = "HashMap-like collection that automatically determines the key."
 edition = "2021"
 
 [dependencies]
-derive-ex = "0.1.7"
+derive-ex = "0.1.8"
 
 [dev-dependencies]
-proptest = "1.2.0"
+proptest = "1.4.0"
 test-strategy = "0.3.1"
 criterion = "0.5.1"
-slab = "0.4.8"
+slab = "0.4.9"
 rand = "0.8.5"
 
 [lib]
