@@ -74,6 +74,27 @@ impl<T> SlabMap<T> {
         }
     }
 
+    pub fn from_iter_with_capacity(
+        iter: impl IntoIterator<Item = (usize, T)>,
+        capacity: usize,
+    ) -> Self {
+        let mut entries = Vec::with_capacity(capacity);
+        for (key, value) in iter {
+            entries.resize_with(key + 1, || Entry::VacantTail {
+                next_vacant_idx: INVALID_INDEX,
+            });
+            entries[key] = Entry::Occupied(value);
+        }
+        let mut this = Self {
+            entries,
+            next_vacant_idx: INVALID_INDEX,
+            len: usize::MAX,
+            non_optimized_count: usize::MAX,
+        };
+        this.optimize();
+        this
+    }
+
     /// Returns the number of elements the SlabMap can hold without reallocating.
     #[inline]
     pub fn capacity(&self) -> usize {
@@ -384,6 +405,7 @@ impl<T> SlabMap<T> {
         let mut idx = 0;
         let mut vacant_head_idx = 0;
         let mut prev_vacant_tail_idx = None;
+        let mut len = 0;
         self.next_vacant_idx = INVALID_INDEX;
         while let Some(e) = self.entries.get_mut(idx) {
             match e {
@@ -397,6 +419,7 @@ impl<T> SlabMap<T> {
                     if f(idx, value) {
                         self.set_vacants(vacant_head_idx, idx, &mut prev_vacant_tail_idx);
                         idx += 1;
+                        len += 1;
                         vacant_head_idx = idx;
                     } else {
                         self.entries[idx] = Entry::VacantTail {
@@ -409,6 +432,7 @@ impl<T> SlabMap<T> {
         }
         self.entries.truncate(vacant_head_idx);
         self.non_optimized_count = 0;
+        self.len = len;
     }
     fn set_vacants(
         &mut self,
@@ -466,9 +490,13 @@ impl<T> SlabMap<T> {
     /// ```
     pub fn optimize(&mut self) {
         if !self.is_optimized() {
-            self.merge_vacants(|_, _| true);
+            self.force_optimize();
         }
     }
+    fn force_optimize(&mut self) {
+        self.merge_vacants(|_, _| true);
+    }
+
     #[inline]
     fn is_optimized(&self) -> bool {
         self.non_optimized_count == 0

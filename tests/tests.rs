@@ -32,6 +32,7 @@ fn test_retain() {
 
     let value: Vec<_> = s.values().cloned().collect();
     assert_eq!(value, vec![10, 20]);
+    assert_eq!(s.len(), 2);
 }
 
 #[test]
