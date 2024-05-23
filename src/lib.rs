@@ -98,7 +98,7 @@ impl<T> SlabMap<T> {
             len: usize::MAX,
             non_optimized_count: usize::MAX,
         };
-        this.force_optimize();
+        this.rebuild_vacants();
         this
     }
 
@@ -406,9 +406,12 @@ impl<T> SlabMap<T> {
     /// assert_eq!(value, vec![10, 20]);
     /// ```
     pub fn retain(&mut self, f: impl FnMut(usize, &mut T) -> bool) {
-        self.merge_vacants(f)
+        self.rebuild_vacants_with(f)
     }
-    fn merge_vacants(&mut self, mut f: impl FnMut(usize, &mut T) -> bool) {
+    fn rebuild_vacants(&mut self) {
+        self.rebuild_vacants_with(|_, _| true);
+    }
+    fn rebuild_vacants_with(&mut self, mut f: impl FnMut(usize, &mut T) -> bool) {
         let mut idx = 0;
         let mut vacant_head_idx = 0;
         let mut prev_vacant_tail_idx = None;
@@ -497,11 +500,8 @@ impl<T> SlabMap<T> {
     /// ```
     pub fn optimize(&mut self) {
         if !self.is_optimized() {
-            self.force_optimize();
+            self.rebuild_vacants();
         }
-    }
-    fn force_optimize(&mut self) {
-        self.merge_vacants(|_, _| true);
     }
 
     #[inline]
