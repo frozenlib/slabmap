@@ -86,7 +86,7 @@ impl<T> SlabMap<T> {
     /// Panics if the new capacity overflows usize.    
     #[inline]
     pub fn reserve(&mut self, additional: usize) {
-        self.try_reserve(additional).unwrap();
+        self.entries.reserve(self.entries_additional(additional))
     }
 
     /// Try to reserve capacity for at least additional more elements to be inserted in the given `SlabMap<T>`.
@@ -226,7 +226,7 @@ impl<T> SlabMap<T> {
     /// assert_eq!(s[key_xyz], "xyz");
     /// ```
     pub fn insert(&mut self, value: T) -> usize {
-        self.insert_with_key(|_| value)
+        self.insert_raw(|_| value)
     }
 
     /// Inserts a value given by `f` into the SlabMap. The key to be associated with the value is passed to `f`.
@@ -242,8 +242,12 @@ impl<T> SlabMap<T> {
     ///
     /// assert_eq!(s[key], format!("my key is {}", key));
     /// ```
-    #[inline]
     pub fn insert_with_key(&mut self, f: impl FnOnce(usize) -> T) -> usize {
+        self.insert_raw(f)
+    }
+
+    #[inline]
+    pub fn insert_raw(&mut self, f: impl FnOnce(usize) -> T) -> usize {
         let idx;
         if self.next_vacant_idx < self.entries.len() {
             idx = self.next_vacant_idx;
@@ -635,18 +639,17 @@ impl<'a, T> Iterator for Drain<'a, T> {
     type Item = (usize, T);
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        let mut e_opt = self.iter.next();
-        while let Some(e) = e_opt {
-            e_opt = match e.1 {
+        let (mut key, mut value) = self.iter.next()?;
+        loop {
+            (key, value) = match value {
                 Entry::Occupied(value) => {
                     self.len -= 1;
-                    return Some((e.0, value));
+                    return Some((key, value));
                 }
-                Entry::VacantHead { vacant_body_len } => self.iter.nth(vacant_body_len + 1),
-                Entry::VacantTail { .. } => self.iter.next(),
+                Entry::VacantHead { vacant_body_len } => self.iter.nth(vacant_body_len + 1)?,
+                Entry::VacantTail { .. } => self.iter.next()?,
             }
         }
-        None
     }
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -674,18 +677,17 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = (usize, &'a T);
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        let mut e_opt = self.iter.next();
-        while let Some(e) = e_opt {
-            e_opt = match e {
-                (key, Entry::Occupied(value)) => {
+        let (mut key, mut value) = self.iter.next()?;
+        loop {
+            (key, value) = match value {
+                Entry::Occupied(value) => {
                     self.len -= 1;
                     return Some((key, value));
                 }
-                (_, Entry::VacantHead { vacant_body_len }) => self.iter.nth(*vacant_body_len + 1),
-                (_, Entry::VacantTail { .. }) => self.iter.next(),
+                Entry::VacantHead { vacant_body_len } => self.iter.nth(*vacant_body_len + 1)?,
+                Entry::VacantTail { .. } => self.iter.next()?,
             }
         }
-        None
     }
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -713,18 +715,17 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = (usize, &'a mut T);
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        let mut e_opt = self.iter.next();
-        while let Some(e) = e_opt {
-            e_opt = match e {
-                (key, Entry::Occupied(value)) => {
+        let (mut key, mut value) = self.iter.next()?;
+        loop {
+            (key, value) = match value {
+                Entry::Occupied(value) => {
                     self.len -= 1;
                     return Some((key, value));
                 }
-                (_, Entry::VacantHead { vacant_body_len }) => self.iter.nth(*vacant_body_len + 1),
-                (_, Entry::VacantTail { .. }) => self.iter.next(),
+                Entry::VacantHead { vacant_body_len } => self.iter.nth(*vacant_body_len + 1)?,
+                Entry::VacantTail { .. } => self.iter.next()?,
             }
         }
-        None
     }
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
