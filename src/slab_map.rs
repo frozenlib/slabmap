@@ -54,6 +54,9 @@ impl<T> SlabMap<T> {
     }
 
     /// Constructs as new `SlabMap<T>` from keys and values with at least the specified capacity.
+    ///
+    /// It is recommended to specify a capacity of at least max_key + 1 from the iter,
+    /// not just the number of elements in the iter.
     pub fn from_iter_with_capacity(
         iter: impl IntoIterator<Item = (usize, T)>,
         capacity: usize,
